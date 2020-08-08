@@ -1,11 +1,15 @@
+BASE_URL="https://sdarot.tv/watch/88"
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 driver = webdriver.Firefox()
-driver.get("")
-eps = driver.find_element_by_xpath("/html/body/div[2]/section[1]/div[2]/div/div[2]/ul[2]/li[1]")
-eps.click()
-sleep(30)
-b_start = driver.find_element_by_xpath("/html/body/div[2]/section[4]/div/div[2]/button/span")
-b_start.click()
+driver.get(BASE_URL)
 
-vid = driver.find_element_by_xpath("/html/body/div[2]/section[2]/div[2]/div[2]/div/div[2]")
+ele_seasons=driver.find_element_by_id("season").find_elements_by_css_selector("li")
+
+for ele_season in ele_seasons:
+    print("Downloading season " + ele_season.text)
+    ele_season.click()
+    for ele_ep in driver.find_element_by_id("episode").find_elements_by_css_selector("li"):
+        print("Downlaod episode: " + ele_ep.text)
+        ele_ep.click()
