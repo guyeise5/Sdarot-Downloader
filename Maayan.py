@@ -5,13 +5,18 @@ import json
 import requests
 
 base_url = "https://sdarot.rocks"
+show_id = "5555"
 show_url = "https://sdarot.rocks/watch/5555"
 
 SLEEP_BETWEEN_REQS = 0.5
 SLEEP_AFTER_TOKENS = 30
 
 def download_episode(ep):
-    with requests.get(ep['video_url'], stream=True) as r:
+    with requests.get(ep['video_url'], headers={
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36',
+            'referer': ep['url'],
+            'cookie': cookie
+        }, stream=True) as r:
         r.raise_for_status()
         with open(ep['filename'], 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192): 
@@ -48,15 +53,12 @@ for ep in episodes:
         'X-Requested-With': 'XMLHttpRequest',
         'Cookie': cookie
     })
-
     ep['token1'] = response.content
     print("Got token1 {}".format(ep['token1']))
     time.sleep(SLEEP_BETWEEN_REQS)
 
-print("Sleeping {}s".format(SLEEP_AFTER_TOKENS))
-time.sleep(SLEEP_AFTER_TOKENS)
-
-for ep in episodes:
+    print("Sleeping {}s".format(SLEEP_AFTER_TOKENS))
+    time.sleep(SLEEP_AFTER_TOKENS)
     try:
         content = requests.post("https://sdarot.rocks/ajax/watch", {
             'watch': 'true',
@@ -64,21 +66,22 @@ for ep in episodes:
             'serie': ep['SID'],
             'season': ep['season'],
             'episode': ep['episode'],
-            'auth': 'false',
+#            'auth': 'false',
             'type': 'episode'
         }, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36',
-            'Referer': ep['url'],
-            'X-Requested-With': 'XMLHttpRequest',
-            'Cookie': cookie
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36',
+            'referer': ep['url'],
+            'x-requested-with': 'XMLHttpRequest',
+            'cookie': cookie
         }).content
         time.sleep(SLEEP_BETWEEN_REQS)
         print(f"{content.decode('UTF-8')}")
         video_data = json.loads(content)
         print("Got token2 {}".format(video_data['watch']['480']))
 
-        video_url = 'https://{}/w/episode/480/{}.mp4?token={}&time={}&uid='.format(
+        video_url = 'https://{}/w/episode/{}/480/{}.mp4?token={}&time={}&uid='.format(
             video_data['url'],
+            ep['SID'],
             video_data['VID'],
             video_data['watch']['480'],
             video_data['time'])
@@ -92,11 +95,11 @@ for ep in episodes:
         )
 
         ep['video_url'] = video_url
+        
     except IndexError:
         print("Error... skipping token2.")
+        continue
 
-
-for ep in episodes:
     print("Downloading {}".format(ep['filename']))
     download_episode(ep)
     print("Downloaded {}".format(ep['filename']))
