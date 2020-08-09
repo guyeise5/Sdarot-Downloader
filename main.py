@@ -13,6 +13,7 @@ SHOW_URL = f"{BASE_URL}/watch/5411"
 # The version of your chrome browser
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'
 X_REQUESTED_WITH = 'XMLHttpRequest'
+DECODE_PAGE = 'ISO-8859-1'
 
 # We don't won't multiple request at the same time
 SLEEP_BETWEEN_REQS = 0.5
@@ -106,33 +107,74 @@ def download_episode(
                 if chunk:
                     f.write(chunk)
 
+def find_seasons(content):
+    # Getting the seasons that are in website from the page given
+    seasons = []
+    # TODO: think of a better way to save pattern
+    for season in re.findall('(/watch/(\d+)-.*?/season/(\d+?))"', content):
+        seasons.append({
+            'url': BASE_URL + season[0],
+            'SID': season[1],  # not sure this is needed but for future references
+            'number': season[2],
+        })
+    return seasons
+
+def find_episodes(
+    season,
+    user_agent=USER_AGENT,
+    origin=BASE_URL,
+    decode_page=DECODE_PAGE
+):
+    print(f"Getting The season {season['number']} page - so we can see which episodes exists")
+    show_page = requests.get(
+        season['url'],
+        headers={
+            'User-Agent': user_agent,
+            'Origin': origin,
+        },
+    ).content.decode(decode_page)
+
+    # TODO: think of a better way to save pattern
+    episodes = []
+    # re.findall allows to find the regex we need in the content
+    for episode in re.findall('(/watch/(\d+)-.*?/season/(\d+?)/episode/(\d+?))"', show_page):
+        episodes.append({
+            'url': origin + episode[0],
+            'SID': episode[1],
+            'season': episode[2],
+            'episode': episode[3]
+        })
+    return episodes
+
 def main():
+
+    # TODO: argparse to give the show id (or multiple show ids), which seasons, episodes and such
+    # TODO: also add debug mode
 
     # The first time we are sending request to the sdarot website - for the show page,
     # it returns a lot of info - we want the Cookie for future requests
     # and the list of episode of our show
-    print("Getting The episodes urls")
-    response = requests.get(
+    print("Getting The show page - so we can see the info we need")
+    show_page = requests.get(
         SHOW_URL,
         headers={
             'User-Agent': USER_AGENT,
             'Origin': BASE_URL,
         },
     )
-    content = response.content
+    content = show_page.content.decode(DECODE_PAGE)
     # Getting the cookie we need for authentication
-    cookie = response.headers['Set-Cookie'].split(';')[0]
+    cookie = show_page.headers['Set-Cookie'].split(';')[0]
 
-    # Getting the episodes we need and the info we need from them
+    # finding the seasons exist in website
+    seasons = find_seasons(content)
+    print(f"{len(seasons)} seasons exists")
+    # finding all the episodes of each season
     episodes = []
-    # re.findall allows to find the regex we need in the content
-    for episode in re.findall('(/watch/(\d+)-.*?/season/(\d+?)/episode/(\d+?))"', content.decode('ISO-8859-1')):
-        episodes.append({
-            'url': BASE_URL + episode[0],
-            'SID': episode[1],
-            'season': episode[2],
-            'episode': episode[3]
-        })
+    for season in seasons:
+        episodes += find_episodes(season)
+
+    print(f"overall {len(episodes)} episodes will be downloaded")
 
     # Going over all the episodes
     # we need to get pre watch token - a valid one
