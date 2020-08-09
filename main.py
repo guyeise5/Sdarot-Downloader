@@ -1,4 +1,3 @@
-import sys
 import re
 import time
 import json
@@ -11,7 +10,8 @@ WATCH_URL = f"{BASE_URL}/ajax/watch"
 # The url for the show you want to download - the url is usually goes by id
 SHOW_URL = f"{BASE_URL}/watch/5411"
 # The version of your chrome browser
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 ' \
+             'Safari/537.36 '
 X_REQUESTED_WITH = 'XMLHttpRequest'
 DECODE_PAGE = 'ISO-8859-1'
 
@@ -28,6 +28,19 @@ def pre_watch_episode(
     user_agent=USER_AGENT,
     x_requested_with=X_REQUESTED_WITH,
 ):
+    """
+    This Function is doing the pre watch steps needed by the website
+    :param episode: The episode we want to pre-watch info - should include:
+    - 'SID' (show id)
+    - 'season'
+    - 'episode'
+    - 'url' (the url for the episode pre-watch)
+    :param cookies: The cookies to send in the pre-watch request
+    :param sleep_for_token: the time to sleep for the token to be valid
+    :param user_agent: the browser info to send in the header
+    :param x_requested_with: the request type - need to send it for authentication reasons/
+    :return: the token of approval for the pre-watch
+    """
     print("Prewatch SID[{}] Season[{}] Episode[{}]".format(
         episode['SID'],
         episode['season'],
@@ -56,12 +69,26 @@ def pre_watch_episode(
     time.sleep(sleep_for_token)
     return token
 
+
 def request_video_info(
     episode,
     cookies,
     user_agent=USER_AGENT,
     x_requested_with=X_REQUESTED_WITH,
 ):
+    """
+    This function is getting the episode video info from the website
+    :param episode: The episode info - should include:
+    - 'SID' (show id)
+    - 'season'
+    - 'episode'
+    - 'url' (the url for the episode pre-watch)
+    - 'pre-watch-token' (the token that approves the pre-watch)
+    :param cookies: The cookies to send in the request
+    :param user_agent: The browser info to send in the header
+    :param x_requested_with: The request type - need to send it for authentication reasons/
+    :return:
+    """
     video_data = json.loads(requests.post(
         WATCH_URL,
         {
@@ -70,7 +97,7 @@ def request_video_info(
             'serie': episode['SID'],
             'season': episode['season'],
             'episode': episode['episode'],
-            #               'auth': 'false',
+            # 'auth': 'false',
             'type': 'episode'
         },
         headers={
@@ -86,12 +113,14 @@ def request_video_info(
     print("Got video token {}".format(video_data['watch']['480']))
     return video_data
 
+
 def download_episode(
     episode,
     cookies,
     user_agent=USER_AGENT,
     chunk_size=8192
 ):
+    # TODO: do this better
     with requests.get(
             episode['video_url'],
             headers={
@@ -107,7 +136,13 @@ def download_episode(
                 if chunk:
                     f.write(chunk)
 
+
 def find_seasons(content):
+    """
+    This function finds the seasons on the host
+    :param content: the show page content
+    :return: the seasons and their info
+    """
     # Getting the seasons that are in website from the page given
     seasons = []
     # TODO: think of a better way to save pattern
@@ -119,12 +154,23 @@ def find_seasons(content):
         })
     return seasons
 
+
 def find_episodes(
     season,
     user_agent=USER_AGENT,
     origin=BASE_URL,
     decode_page=DECODE_PAGE
 ):
+    """
+    This function finds all the episodes of a season in the website
+    :param season: The season we want the episodes of, should include:
+    - number: the season number
+    - url: the url for the season
+    :param user_agent: The browser info to send in the header
+    :param origin: The base website
+    :param decode_page: the decode code
+    :return: The episodes info in the season
+    """
     print(f"Getting The season {season['number']} page - so we can see which episodes exists")
     show_page = requests.get(
         season['url'],
@@ -145,6 +191,7 @@ def find_episodes(
             'episode': episode[3]
         })
     return episodes
+
 
 def main():
 
@@ -173,6 +220,7 @@ def main():
     episodes = []
     for season in seasons:
         episodes += find_episodes(season)
+        time.sleep(SLEEP_BETWEEN_REQS)
 
     print(f"overall {len(episodes)} episodes will be downloaded")
 
@@ -214,6 +262,7 @@ def main():
         print("Downloading {}".format(episode['filename']))
         download_episode(episode, cookie)
         print("Downloaded {}".format(episode['filename']))
+
 
 if __name__ == '__main__':
     main()
