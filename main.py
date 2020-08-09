@@ -86,8 +86,8 @@ def request_video_info(
     - 'pre-watch-token' (the token that approves the pre-watch)
     :param cookies: The cookies to send in the request
     :param user_agent: The browser info to send in the header
-    :param x_requested_with: The request type - need to send it for authentication reasons/
-    :return:
+    :param x_requested_with: The request type - need to send it for authentication reasons
+    :return: The video info
     """
     video_data = json.loads(requests.post(
         WATCH_URL,
