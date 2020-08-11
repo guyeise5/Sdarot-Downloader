@@ -2,13 +2,12 @@
 import sdarot.client as client
 import sdarot.show as show
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 ' \
-             'Safari/537.36 '
 SHOW_ID = 110
 
 def main():
-    c = client.Client(USER_AGENT)
+    c = client.Client()
     s = show.Show(SHOW_ID, c)
+    print(s.get_user_agent())
     c.cookie = s.get_cookie()
     s.download(c)
 
