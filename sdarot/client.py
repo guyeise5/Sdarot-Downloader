@@ -25,7 +25,6 @@ class Client:
 
     @cookie.setter
     def cookie(self, cookie):
-        assert isinstance(cookie, str)
         self._cookie = cookie
 
     @property
