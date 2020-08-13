@@ -15,6 +15,10 @@ class Episode:
         self._number = episode_number
         self._url = f"{BASE_URL}{episode_url}"
 
+    @property
+    def number(self):
+        return self._number
+
     def _pre_watch(self, sdarot_client):
         print(f"pre watch episode {self._number}")
         token = requests.post(

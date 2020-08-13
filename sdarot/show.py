@@ -39,15 +39,26 @@ class Show:
             self._seasons.append(
                 season.Season(
                     self._id,
-                    season_info[2],
+                    int(season_info[2]),
                     season_info[0],
                     sdarot_client
                 )
             )
-        print(f"seasons : {len(self._seasons)}")
+        print(f"The show has {len(self._seasons)} seasons")
+
+    def download_episodes(self, sdarot_client, season, episodes):
+        for s in self._seasons:
+            if s.number == season:
+                s.download_episodes(sdarot_client, episodes)
+
+    def download_seasons(self, sdarot_client, seasons):
+        for s in self._seasons:
+            if s.number in seasons:
+                print(f"downloading season {s.number}")
+                s.download(sdarot_client)
 
     def download(self, sdarot_client):
-        for season in self._seasons:
-            print(f"download season {season.number}")
-            season.download(sdarot_client)
+        for s in self._seasons:
+            print(f"downloading season {s.number}")
+            s.download(sdarot_client)
 
