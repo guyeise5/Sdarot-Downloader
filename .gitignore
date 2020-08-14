@@ -1,3 +1,5 @@
 geckodriver.log
 *.mp4
 .idea/
+images/
+*__pycache__*
