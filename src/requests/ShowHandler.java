@@ -37,8 +37,6 @@ public class ShowHandler extends Handler<Root,Show> {
 		throw new NotImplementedException();
 	}
 
-
-
 	@Override
 	public List<Show> getAll(Root root) {
 		// TODO Auto-generated method stub
@@ -56,5 +54,11 @@ public class ShowHandler extends Handler<Root,Show> {
 		ret.SetName(getShowName(showID));
 		return ret;
 
+	}
+
+	
+	@Override
+	public void download(Show show) {
+		SeasonHandler.getInstance().getAll(show).forEach(s -> SeasonHandler.getInstance().download(s));
 	}
 }

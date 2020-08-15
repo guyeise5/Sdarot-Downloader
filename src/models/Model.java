@@ -15,11 +15,7 @@ public abstract class Model<Father extends Model, Child extends Model> {
 		this.id=id;
 		childrens = new HashMap<Integer, Child>();
 	}
-	
-	public void download() {
-		childrens.values().forEach(c -> c.download());
-	}
-	
+		
 	public String getDownloadPath() throws NullPointerException {
 		return father.getDownloadPath() + "/" + this.getClass().getName() + "_" + this.getID();
 	}
@@ -28,7 +24,7 @@ public abstract class Model<Father extends Model, Child extends Model> {
 		return this.father;
 	}
 	
-	protected HashMap<Integer, Child> getChildren() {
+	public HashMap<Integer, Child> getChildren() {
 		return childrens;
 	}
 	

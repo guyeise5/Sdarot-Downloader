@@ -11,6 +11,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 public class SeasonHandler extends Handler<Show,Season> {
 
 	private SeasonHandler() {}
+	
 	private static SeasonHandler instance = null;
 		
 	public static SeasonHandler getInstance() {
@@ -42,6 +43,13 @@ public class SeasonHandler extends Handler<Show,Season> {
 	public List<Season> getAll(Show show) {
 		// TODO: Implement this function
 		throw new NotImplementedException();
+	}
+
+
+	@Override
+	public void download(Season season) {
+		EpisodeHandler.getInstance().getAll(season).forEach(e -> EpisodeHandler.getInstance().download(e));
+		
 	}
 	
 }

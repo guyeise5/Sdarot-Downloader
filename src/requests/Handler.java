@@ -22,4 +22,6 @@ public abstract class Handler <Father extends Model, T extends Model> {
 	public abstract T getByID(Father father, int ID);
 	
 	public abstract List<T> getAll(Father father);
+	
+	public abstract void download(T model);
 }

@@ -14,12 +14,6 @@ public class Episode extends Model {
 	}
 
 	@Override
-	public void download() {
-		// TODO Auto-generated method stub
-		throw new NotImplementedException();
-	}
-	
-	@Override
 	public HashMap<Integer, Model> getChildren() {
 		return null;
 	}
