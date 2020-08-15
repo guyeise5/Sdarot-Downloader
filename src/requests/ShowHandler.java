@@ -1,39 +1,23 @@
 package requests;
 
 import java.awt.Image;
+import java.util.List;
 
-import models.Season;
+import models.Model;
+import models.Root;
 import models.Show;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 // Singleton class
-public class ShowHandler {
+public class ShowHandler extends Handler<Root,Show> {
 
 	private static ShowHandler instance = null;
-	
-	private Configurations conf;
-	
-	private ShowHandler(Configurations conf)	{
-		this.conf = conf;
-	}
-	
+		
 	public static ShowHandler getInstance() {
 		if(instance == null) {
-			instance = new ShowHandler(Configurations.getInstance());
+			instance = new ShowHandler();
 		}
 		return instance;
-	}
-	
-	public Show getShow(int showID) {
-		if(!IsExists(showID)) {
-			return null;
-		}
-		
-		models.Show ret = new Show(showID, getShowName(showID));
-
-		SeasonHandler.getInstance().getAllSeasons(ret).forEach(s -> ret.AddSeason(s));
-		
-		return ret;
 	}
 	
 	public Image getShowImage(int ShowID) {
@@ -49,5 +33,26 @@ public class ShowHandler {
 	private boolean IsExists(int ShowID) {
 		// TODO: implement this function
 		throw new NotImplementedException();
+	}
+
+
+
+	@Override
+	public List<Show> getAll(Root root) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Show getByID(Root root, int showID) {
+		if(!IsExists(showID)) {
+			return null;
+		}
+		
+		models.Show ret = new Show((Root)root, showID);
+		SeasonHandler.getInstance().getAll(ret).forEach(s -> ret.AddChildren(s));
+		ret.SetName(getShowName(showID));
+		return ret;
+
 	}
 }

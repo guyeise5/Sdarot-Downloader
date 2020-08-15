@@ -5,12 +5,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-// Singleton classs
+// Singleton class
 class Configurations {
 
 	private static final String[] SDAROT_URLS = {"https://sdarot.rocks","https://www.hasdarot.net", "http://sdarot.pro", "https://sdarot.world", "https://sdarot.tv", "https://sdarot.work"};
 	private static String findSdarotURL() {
-		// TODO: find a way to make this generic using SDAROT_URLS parameter and HTTP Requests
+		// TODO: find a way to make this function find valid URL using SDAROT_URLS parameter and HTTP Requests
 		return 	SDAROT_URLS[0];
 	}
 

@@ -1,32 +1,32 @@
 package models;
 
-import interfaces.Model;
+import java.util.HashMap;
+
+import javax.activity.InvalidActivityException;
+
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class Episode implements Model {
+public class Episode extends Model {
 
-	private Season season;
-	int number;
-	
-	public Episode(Season season, int number) {
-		this.season = season;
-		this.number = number;
+
+	public Episode(Season season, int id) {
+		super(season, id);
 	}
 
 	@Override
-	public void Download() {
+	public void download() {
 		// TODO Auto-generated method stub
 		throw new NotImplementedException();
 	}
-
+	
 	@Override
-	public String getDownloadPath() {
-		
-		return season.getDownloadPath() + "/Episode " + Integer.toString(this.number);
+	public HashMap<Integer, Model> getChildren() {
+		return null;
 	}
-
-	public int getNumber() {
-		return this.number;
+	
+	@Override
+	public void AddChildren(Model child) {
+		// TODO: think of a better way to throw exception here
+		throw new NotImplementedException();
 	}
-
 }

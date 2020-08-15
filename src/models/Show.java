@@ -1,46 +1,26 @@
 package models;
-import java.util.HashMap;
 
-import interfaces.Model;
-
-public class Show implements Model {
-
-	private HashMap<Integer, Season> seasons;
+public class Show extends Model<Root, Season> {
 
 	private String name;
-	private int sid;
-	private String downloadPath;
 
-	public Show(int sid, String name) {
-		this.name = name;
-		this.sid = sid;
-		seasons = new HashMap<Integer, Season>();
-		}
-
-	@Override
-	public void Download() {
-		if(downloadPath == null) {
-			throw new NullPointerException("please execute 'SetDownloadPath' method before downloading");
-		}
-		
-		seasons.values().forEach(s -> s.Download());
-	}
-
-	@Override
-	public String getDownloadPath() {
-		return this.downloadPath;
+	public Show(Root root, int id) {
+		super(root, id);
 	}
 	
-	public void AddSeason(Season s) {
-		seasons.put(s.getNumber(), s);
+	public void SetName(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public String getDownloadPath() {
+		if(this.getName() == null) {
+			return super.getDownloadPath();
+		}
+		return father.getDownloadPath() + "/" + this.getName();
 	}
 
-	public void SetDownloadPath(String path) throws NullPointerException {
-		// TODO: Make this test more rigid
-		if(path == null ) {
-			throw new NullPointerException("path cannot be null");
-		}
-		
-		this.downloadPath = path;
+	public String getName() {
+		return this.name;
 	}
 }

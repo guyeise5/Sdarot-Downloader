@@ -2,45 +2,44 @@ package requests;
 
 import java.util.List;
 
-import models.Episode;
+import models.Model;
 import models.Season;
 import models.Show;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 // Singleton class
-public class SeasonHandler {
+public class SeasonHandler extends Handler<Show,Season> {
 
 	private static SeasonHandler instance = null;
-	
-	private Configurations conf;
-	
-	private SeasonHandler(Configurations conf)	{
-		this.conf = conf;
-	}
-	
+		
 	public static SeasonHandler getInstance() {
 		if(instance == null) {
-			instance = new SeasonHandler(Configurations.getInstance());
+			instance = new SeasonHandler();
 		}
 		return instance;
 	}
-	
-	public models.Season getSeason(Show show, int seasonNumber) {
-		if(!IsExists(show, seasonNumber)) {
-			return null;
-		}
-		Season ret = new Season(show, seasonNumber);
-		EpisodeHandler.getInstance().getAllEpisodes(ret).forEach(e -> ret.AddEpisoe(e));
-		return ret;
-	}
-	
-	public List<models.Season> getAllSeasons(Show show){
-		// TODO: implement this function
-		throw new NotImplementedException();
-	}
+
 	
 	public boolean IsExists(Show show, int seasonNumber) {
 		// TODO: implement this function
+		throw new NotImplementedException();
+	}
+
+	
+	@Override
+	public Season getByID(Show show, int seasonID) {
+		if(!IsExists(show, seasonID)) {
+			return null;
+		}
+		Season ret = new Season((Show)show, seasonID);
+		EpisodeHandler.getInstance().getAll(ret).forEach(e -> ret.AddChildren(e));
+		return ret;
+	}
+	
+
+	@Override
+	public List<Season> getAll(Show show) {
+		// TODO: Implement this function
 		throw new NotImplementedException();
 	}
 	
