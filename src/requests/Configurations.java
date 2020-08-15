@@ -3,6 +3,7 @@ package requests;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -11,6 +12,7 @@ import java.util.Random;
 // Singleton class
 class Configurations {
 
+	public static final int OK_STATUS = 200;
 	private static final String[] SDAROT_URLS 
 	= {"https://sdarot.rocks",
 			"https://www.hasdarot.net",
@@ -22,7 +24,7 @@ class Configurations {
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0" };
 
-	private URL sdarotURL;
+	private URI sdarotURI;
 	private String cookie;
 	private String userAgent;
 
@@ -39,27 +41,48 @@ class Configurations {
 		// getting random user-agent (browser)
 		this.userAgent = USER_AGENTS[new Random().nextInt(USER_AGENTS.length)];
 
-		// TODO: get requests until we find a valid url - and then define sdarotUrl
-		// TODO: take the cookie from the good response and set the cookie with it
-		try {
+		// reusing the client
+		// TODO: maybe set the client general for all the handlers ? need to think about it
+		HttpClient httpClient = HttpClient.newBuilder()
+	            .version(HttpClient.Version.HTTP_2)
+	            .build();
+		
+		for (String url : SDAROT_URLS) {
+			URI uri = URI.create(url);
+	        HttpRequest request = HttpRequest.newBuilder()
+	                .GET()
+	                .uri(uri)
+	                .setHeader("User-Agent", userAgent)
+	                .build();
 
-			this.sdarotURL = new URL(SDAROT_URLS[0]);
-			this.cookie = null;
-		} catch (MalformedURLException e) {
-			// Should never get to this section
-			e.printStackTrace();
+	        HttpResponse<String> response;
+			try {
+				response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		        
+		       if (response.statusCode() == OK_STATUS) {
+		          // We got a successful url
+		    	   this.sdarotURI = uri;
+    		       // TODO: take the cookie from the good response and set the cookie with it
+		    	   // //System.out.println(response.headers().firstValue("set-cookie"));
+		    	   this.cookie=null;
+		    	   break;
+		       }
+			} catch (IOException | InterruptedException e1) {
+				System.out.printf("%s is not valid%n", url);
+				e1.printStackTrace();
+			}
 		}
 	}
 	
-	public URL getSdarotURL() {
-		return sdarotURL;
+	public URI getSdarotURL() {
+		return this.sdarotURI;
 	}
 	
-	public String getCookie() {
-		return cookie;
+	public String getCookies() {
+		return this.cookie;
 	}
 
 	public String getUserAgent() {
-		return userAgent;
+		return this.userAgent;
 	}
 }
