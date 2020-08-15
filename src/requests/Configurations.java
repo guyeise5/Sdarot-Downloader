@@ -89,7 +89,7 @@ class Configurations {
 		}
 	}
 	
-	public URI getSdarotURL() {
+	public URI getSdarotURI() {
 		return this.sdarotURI;
 	}
 	
