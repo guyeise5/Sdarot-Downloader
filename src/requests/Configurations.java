@@ -47,6 +47,8 @@ class Configurations {
 	            .version(HttpClient.Version.HTTP_2)
 	            .build();
 		
+		this.sdarotURI = null;
+		
 		for (String url : SDAROT_URLS) {
 			URI uri = URI.create(url);
 	        HttpRequest request = HttpRequest.newBuilder()
@@ -71,6 +73,10 @@ class Configurations {
 				System.out.printf("%s is not valid%n", url);
 				e1.printStackTrace();
 			}
+		}
+		
+		if (this.sdarotURI == null) {
+			throw new NullPointerException("there is no valid sdarot url");
 		}
 	}
 	
