@@ -2,7 +2,7 @@
 import sdarot.client as client
 import sdarot.show as show
 import argparse
-import GUI.gui as gui
+from GUI.ShowDownloader import ShowDownloader
 
 def parse_args():
     """Parse program arguments."""
@@ -37,7 +37,7 @@ def main():
         print("downloading all show")
         s.download(c)
     '''
-    gui.ShowDownloader()
+    ShowDownloader()
 
 if __name__ == '__main__':
     main()
