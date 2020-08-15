@@ -1,16 +1,43 @@
 
 import sdarot.client as client
 import sdarot.show as show
+import argparse
+import GUI.gui as gui
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 ' \
-             'Safari/537.36 '
-SHOW_ID = 110
+def parse_args():
+    """Parse program arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-s',
+        '--show-id',
+        required=True,
+        type=int,
+        help='The show id for the show you want to download',
+    )
+    parser.add_argument(
+        '-S',
+        '--seasons',
+        nargs='*',
+        type=int,
+        help='The seasons of the show you want to download',
+    )
+    args = parser.parse_args()
+    return args
 
 def main():
-    c = client.Client(USER_AGENT)
-    s = show.Show(SHOW_ID, c)
+    '''
+    parameters = parse_args()
+    c = client.Client()
+    s = show.Show(parameters.show_id, c)
     c.cookie = s.get_cookie()
-    s.download(c)
+    if parameters.seasons:
+        print("downloading selected seasons only")
+        s.download_seasons(c, parameters.seasons)
+    else:
+        print("downloading all show")
+        s.download(c)
+    '''
+    gui.ShowDownloader()
 
 if __name__ == '__main__':
     main()

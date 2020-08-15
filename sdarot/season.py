@@ -35,13 +35,29 @@ class Season:
                 episode.Episode(
                     self._show_id,
                     self._number,
-                    episode_info[3],
+                    int(episode_info[3]),
                     episode_info[0]
                 )
             )
+
     @property
     def number(self):
         return self._number
+
+    @property
+    def episodes(self):
+        return self._episodes
+
+    def get_episode(self, episode_number):
+        for e in self._episodes:
+            if e.number == episode_number:
+                return e
+        return -1
+
+    def download_episodes(self, sdarot_client, episodes):
+        for e in self._episodes:
+            if e.number in episode:
+                e.download(sdarot_client)
 
     def download(self, sdarot_client):
         for episode in self._episodes:
