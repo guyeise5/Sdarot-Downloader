@@ -2,9 +2,6 @@ package models;
 
 import java.util.HashMap;
 
-import javax.activity.InvalidActivityException;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Episode extends Model {
 
@@ -21,6 +18,6 @@ public class Episode extends Model {
 	@Override
 	public void AddChildren(Model child) {
 		// TODO: think of a better way to throw exception here
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("method not implemented yet!");
 	}
 }

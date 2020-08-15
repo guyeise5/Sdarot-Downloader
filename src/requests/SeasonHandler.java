@@ -5,7 +5,6 @@ import java.util.List;
 import models.Model;
 import models.Season;
 import models.Show;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 // Singleton class
 public class SeasonHandler extends Handler<Show,Season> {
@@ -24,7 +23,7 @@ public class SeasonHandler extends Handler<Show,Season> {
 	
 	public boolean IsExists(Show show, int seasonNumber) {
 		// TODO: implement this function
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("method not implemented yet!");
 	}
 
 	
@@ -42,7 +41,7 @@ public class SeasonHandler extends Handler<Show,Season> {
 	@Override
 	public List<Season> getAll(Show show) {
 		// TODO: Implement this function
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("method not implemented yet!");
 	}
 
 

@@ -12,6 +12,11 @@ public class Root extends Model<Model, Show> {
 	public Root() {
 		super(null, 0);
 	}
+
+	public Root(String downloadPath) {
+		super(null, 0);
+		this.setDownloadPath(downloadPath);
+	}
 	
 	@Override
 	public String getDownloadPath() throws NullPointerException {

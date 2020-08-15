@@ -6,7 +6,6 @@ import java.util.List;
 import models.Model;
 import models.Root;
 import models.Show;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 // Singleton class
 public class ShowHandler extends Handler<Root,Show> {
@@ -29,12 +28,12 @@ public class ShowHandler extends Handler<Root,Show> {
 	
 	private String getShowName(int ShowID) {
 		// TODO: implement this function
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("method not implemented yet!");
 	}
 	
 	private boolean IsExists(int ShowID) {
 		// TODO: implement this function
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("method not implemented yet!");
 	}
 
 	@Override
