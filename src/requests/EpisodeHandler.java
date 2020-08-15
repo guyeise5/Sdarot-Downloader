@@ -9,6 +9,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class EpisodeHandler extends Handler<Season, Episode> {
 
+	private EpisodeHandler() {}
 	private static EpisodeHandler instance = null;
 	
 	public static EpisodeHandler getInstance() {
@@ -31,6 +32,11 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 
 	@Override
 	public List<Episode> getAll(Season season) {
+		// TODO: Implement this function
+		throw new NotImplementedException();
+	}
+	
+	public void download(Episode e) {
 		// TODO: Implement this function
 		throw new NotImplementedException();
 	}

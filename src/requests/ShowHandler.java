@@ -11,6 +11,8 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 // Singleton class
 public class ShowHandler extends Handler<Root,Show> {
 
+	private ShowHandler() {}
+	
 	private static ShowHandler instance = null;
 		
 	public static ShowHandler getInstance() {

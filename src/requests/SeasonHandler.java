@@ -10,6 +10,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 // Singleton class
 public class SeasonHandler extends Handler<Show,Season> {
 
+	private SeasonHandler() {}
 	private static SeasonHandler instance = null;
 		
 	public static SeasonHandler getInstance() {
