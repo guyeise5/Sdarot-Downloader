@@ -5,6 +5,7 @@ import java.util.List;
 import models.Episode;
 import models.Model;
 import models.Season;
+import models.Show;
 
 public class EpisodeHandler extends Handler<Season, Episode> {
 
@@ -18,9 +19,9 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		return instance;
 	}
 	
-	public boolean IsExists(Season season, int episodeNumber) {
-		// TODO: implement this function
-		throw new UnsupportedOperationException("method not implemented yet!");
+	@Override
+	public String getChangePartUrl(Season season, int episodeID) {
+		return String.format("%s/episode/%s", SeasonHandler.getInstance().getChangePartUrl(season.getFather(), season.getID()), episodeID);
 	}
 
 	@Override

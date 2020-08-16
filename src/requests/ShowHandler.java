@@ -4,10 +4,6 @@ import java.awt.Image;
 import java.io.IOException;
 import java.util.List;
 
-import javax.security.auth.login.Configuration;
-
-import requests.Configurations;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,31 +36,11 @@ public class ShowHandler extends Handler<Root,Show> {
 		// for now - need to think on how to get real name
 		return (String.format("%s", ShowID));
 	}
+
+	public String getChangePartUrl(Root root, int showID) {
+		return String.format("%s", showID);
+	}
 	
-	private static boolean IsExists(int showID) {
-		try {
-			HttpResponse<String> response = getPageResponse(showID);
-			if (response.statusCode() == Configurations.OK_STATUS) {
-	        	return true;
-	        } 
-	        return false;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-		
-	}
-
-	public static HttpResponse<String> getPageResponse(int showID) throws IOException, InterruptedException {
-		HttpClient client = Configurations.getInstance().getHttpClient();
-		HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create(String.format("%s/watch/%s", Configurations.getInstance().getSdarotURI().toString(), showID)))
-                .setHeader("User-Agent", Configurations.getInstance().getUserAgent())
-                .build();
-		return client.send(request, HttpResponse.BodyHandlers.ofString());
-	}
-
 	@Override
 	public List<Show> getAll(Root root) {
 		// TODO Auto-generated method stub
@@ -73,7 +49,7 @@ public class ShowHandler extends Handler<Root,Show> {
 
 	@Override
 	public Show getByID(Root root, int showID) {
-		if(!IsExists(showID)) {
+		if(!IsExists(root, showID)) {
 			return null;
 		}
 		Show ret = new Show((Root)root, showID);
@@ -87,4 +63,5 @@ public class ShowHandler extends Handler<Root,Show> {
 	public void download(Show show) {
 		SeasonHandler.getInstance().getAll(show).forEach(s -> SeasonHandler.getInstance().download(s));
 	}
+
 }

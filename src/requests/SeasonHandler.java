@@ -1,8 +1,14 @@
 package requests;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 import models.Model;
+import models.Root;
 import models.Season;
 import models.Show;
 
@@ -19,13 +25,11 @@ public class SeasonHandler extends Handler<Show,Season> {
 		}
 		return instance;
 	}
-
 	
-	public boolean IsExists(Show show, int seasonNumber) {
-		// TODO: implement this function
-		throw new UnsupportedOperationException("method not implemented yet!");
+	@Override
+	public String getChangePartUrl(Show show, int seasonID) {
+		return String.format("%s/season/%s", ShowHandler.getInstance().getChangePartUrl(show.getFather(), show.getID()), seasonID);
 	}
-
 	
 	@Override
 	public Season getByID(Show show, int seasonID) {
@@ -44,6 +48,16 @@ public class SeasonHandler extends Handler<Show,Season> {
 		throw new UnsupportedOperationException("method not implemented yet!");
 	}
 
+	@Override
+	public HttpResponse<String> getPageResponse(Show show, int seasonID) throws IOException, InterruptedException {
+		HttpClient client = conf.getHttpClient();
+		HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create(String.format("%s/watch/%s/season/%s", conf.getSdarotURI().toString(), show.getID(), seasonID)))
+                .setHeader("User-Agent", conf.getUserAgent())
+                .build();
+		return client.send(request, HttpResponse.BodyHandlers.ofString());
+	}
 
 	@Override
 	public void download(Season season) {
