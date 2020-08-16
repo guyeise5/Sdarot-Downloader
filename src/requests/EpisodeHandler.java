@@ -26,8 +26,10 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 
 	@Override
 	public Episode getByID(Season season, int episodeID) {
-		// TODO: Implement this function
-		throw new UnsupportedOperationException("method not implemented yet!");
+		if(!IsExists(season, episodeID)) {
+			return null;
+		}
+		return new Episode((Season)season, episodeID);
 	}
 
 	@Override
