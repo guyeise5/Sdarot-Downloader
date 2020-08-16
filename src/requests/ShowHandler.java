@@ -55,7 +55,7 @@ public class ShowHandler extends Handler<Root,Show> {
 		
 	}
 
-	public static HttpResponse getPageResponse(int showID) throws IOException, InterruptedException {
+	public static HttpResponse<String> getPageResponse(int showID) throws IOException, InterruptedException {
 		HttpClient client = Configurations.getInstance().getHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
                 .GET()
