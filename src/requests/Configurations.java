@@ -13,7 +13,6 @@ import java.util.Random;
 class Configurations {
 
 	public static final int OK_STATUS = 200;
-	public static final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};
 	
 	// The possible urls for sdarot website 
 	private static final String[] SDAROT_URLS 
@@ -23,6 +22,8 @@ class Configurations {
 			"https://sdarot.world",
 			"https://sdarot.tv", 
 			"https://sdarot.work" };
+	// sdarot website page can't contain this
+	private static final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};
 	// Some options for user agent
 	private static final String[] USER_AGENTS 
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 

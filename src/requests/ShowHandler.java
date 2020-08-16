@@ -43,8 +43,8 @@ public class ShowHandler extends Handler<Root,Show> {
 	
 	private static boolean IsExists(int showID) {
 		try {
-			HttpResponse response = getPageResponse(showID);
-			if (response.statusCode() == Configurations.getInstance().OK_STATUS) {
+			HttpResponse<String> response = getPageResponse(showID);
+			if (response.statusCode() == Configurations.OK_STATUS) {
 	        	return true;
 	        } 
 	        return false;
