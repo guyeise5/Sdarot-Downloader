@@ -13,25 +13,27 @@ import java.util.Random;
 class Configurations {
 
 	public static final int OK_STATUS = 200;
+	public static final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};
+	
 	// The possible urls for sdarot website 
 	private static final String[] SDAROT_URLS 
 	= {"https://sdarot.rocks",
-			"https://www.hasdarot.net",
-			"http://sdarot.pro",
+			//"https://www.hasdarot.net", // This one has diffrent api - by show name not by id
+			"http://sdarot.pro", 
 			"https://sdarot.world",
-			"https://sdarot.tv",
-			"https://sdarot.work"};
+			"https://sdarot.tv", 
+			"https://sdarot.work" };
 	// Some options for user agent
 	private static final String[] USER_AGENTS 
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0" };
 
 	// the sdarot uri
-	private URI sdarotURI;
+	private static URI sdarotURI;
 	// reusing the client for all requests
-	private HttpClient httpClient;
+	private static HttpClient httpClient;
 	// user-agent header (The browser agent)
-	private String userAgent;
+	private static String userAgent;
 
 	private static Configurations instance = null;
 	
@@ -74,9 +76,19 @@ class Configurations {
 				response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 		        
 		       if (response.statusCode() == OK_STATUS) {
-		          // We got a successful uri
-		    	   this.sdarotURI = uri;
-		    	   break;
+		    	   // we got good response - now need to check the page is what we expect
+		    	   
+		    	   int index = 0;
+		    	   boolean goodUri = true;
+		    	   while (goodUri && index < WEBSITE_NOT_CONTAINES.length) {
+		    		   goodUri = !response.body().toString().contains(WEBSITE_NOT_CONTAINES[index]);
+		    		   index++;
+		    	   }
+		    	   
+		    	   if (goodUri) {
+		    		   this.sdarotURI = uri;
+		    		   break;
+		    	   }
 		       }
 			} catch (IOException | InterruptedException e1) {
 				System.out.printf("%s is not valid%n", url);
