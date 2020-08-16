@@ -21,16 +21,17 @@ public abstract class Handler <Father extends Model, T extends Model> {
 	}
 	
 	public boolean IsExists(Father father, int ID) {
-		try {
-			HttpResponse<String> response = getPageResponse(father, ID);
-			if (response.statusCode() == conf.OK_STATUS) {
-	        	return true;
-	        } 
-	        return false;
-		} catch (Exception e) {
-			e.printStackTrace();
+			HttpResponse<String> response;
+			try {
+				response = getPageResponse(father, ID);
+				if (response.statusCode() == conf.OK_STATUS) {
+		        	return true;
+		        }
+			} catch (IOException | InterruptedException e) {
+				e.printStackTrace();
+			}
 			return false;
-		}
+		
 	}
 	
 	public HttpResponse<String> getPageResponse(Father father, int ID) throws IOException, InterruptedException {
