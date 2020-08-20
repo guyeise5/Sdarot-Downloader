@@ -28,9 +28,13 @@ class Configurations {
 	private static final String[] USER_AGENTS 
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0" };
+	// x requested 
+	public static final String X_REQUESTED_WITH = "XMLHttpRequest";
 
 	// the sdarot uri
 	private static URI sdarotURI;
+	// the watch uri
+	private static URI watchURI;
 	// reusing the client for all requests
 	private static HttpClient httpClient;
 	// user-agent header (The browser agent)
@@ -88,6 +92,7 @@ class Configurations {
 		    	   
 		    	   if (goodUri) {
 		    		   this.sdarotURI = uri;
+		    		   this.watchURI = uri.create(String.format(uri.toString(), "/ajax/watch")).normalize();
 		    		   break;
 		    	   }
 		       }
@@ -104,6 +109,10 @@ class Configurations {
 	
 	public URI getSdarotURI() {
 		return this.sdarotURI;
+	}
+	
+	public URI getWatchURI() {
+		return this.watchURI;
 	}
 	
 	public HttpClient getHttpClient() {

@@ -5,8 +5,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import models.Episode;
 import models.Model;
 import models.Root;
 import models.Season;
@@ -32,7 +36,7 @@ public class SeasonHandler extends Handler<Show,Season> {
 	}
 	
 	@Override
-	public Season getByID(Show show, int seasonID) {
+	public Season getByID(Show show, int seasonID) throws IOException, InterruptedException {
 		if(!IsExists(show, seasonID)) {
 			return null;
 		}
@@ -43,26 +47,27 @@ public class SeasonHandler extends Handler<Show,Season> {
 	
 
 	@Override
-	public List<Season> getAll(Show show) {
-		// TODO: Implement this function
-		throw new UnsupportedOperationException("method not implemented yet!");
-	}
-
-	@Override
-	public HttpResponse<String> getPageResponse(Show show, int seasonID) throws IOException, InterruptedException {
+	public List<Season> getAll(Show show) throws IOException, InterruptedException {
+		List<Season> seasons = new ArrayList<>();
 		HttpClient client = conf.getHttpClient();
-		HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create(String.format("%s/watch/%s/season/%s", conf.getSdarotURI().toString(), show.getID(), seasonID)))
-                .setHeader("User-Agent", conf.getUserAgent())
-                .build();
-		return client.send(request, HttpResponse.BodyHandlers.ofString());
+		Pattern seasonPattern = Pattern.compile(String.format("(/watch/%s-.*?/season/(\\d+?)\")", show.getID()));
+        Matcher matcher = seasonPattern.matcher(ShowHandler.getInstance().getPageResponse(show.getFather(), show.getID()).body());
+        while (matcher.find()) {
+        	String seasonurl = matcher.group();
+        	seasonurl = seasonurl.substring(0, seasonurl.length() - 1); // removing the " in the end
+    		seasons.add(new Season(show, Integer.parseInt(seasonurl.split("/season/")[1])));
+        }
+		return seasons;
 	}
 
 	@Override
 	public void download(Season season) {
-		EpisodeHandler.getInstance().getAll(season).forEach(e -> EpisodeHandler.getInstance().download(e));
-		
+		try {
+			EpisodeHandler.getInstance().getAll(season).forEach(e -> EpisodeHandler.getInstance().download(e));
+		} catch (IOException | InterruptedException e) {
+		    System.out.printf("Can't download season %s, problem getting the episodes, error:%n", season.getID());
+			e.printStackTrace();
+		}
 	}
 	
 }

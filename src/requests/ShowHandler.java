@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import models.Root;
+import models.Season;
 import models.Show;
 
 // Singleton class
@@ -48,7 +49,7 @@ public class ShowHandler extends Handler<Root,Show> {
 	}
 
 	@Override
-	public Show getByID(Root root, int showID) {
+	public Show getByID(Root root, int showID) throws IOException, InterruptedException {
 		if(!IsExists(root, showID)) {
 			return null;
 		}
@@ -61,7 +62,12 @@ public class ShowHandler extends Handler<Root,Show> {
 	
 	@Override
 	public void download(Show show) {
-		SeasonHandler.getInstance().getAll(show).forEach(s -> SeasonHandler.getInstance().download(s));
+		try {
+			SeasonHandler.getInstance().getAll(show).forEach(s -> SeasonHandler.getInstance().download(s));
+		} catch (IOException | InterruptedException e) {
+		    System.out.printf("Can't download show %s, problem getting the seasons, error:%n", show.getID());
+			e.printStackTrace();
+		}
 	}
 
 }
