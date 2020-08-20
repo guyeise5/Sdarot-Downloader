@@ -92,7 +92,7 @@ class Configurations {
 		    	   
 		    	   if (goodUri) {
 		    		   this.sdarotURI = uri;
-		    		   this.watchURI = uri.create(String.format(uri.toString(), "/ajax/watch")).normalize();
+		    		   this.watchURI = uri.create(String.format("%s%s",uri.toString(), "/ajax/watch")).normalize();
 		    		   break;
 		    	   }
 		       }
