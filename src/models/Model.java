@@ -17,7 +17,7 @@ public abstract class Model<Father extends Model, Child extends Model> {
 	}
 		
 	public String getDownloadPath() throws NullPointerException {
-		return father.getDownloadPath() + "/" + this.getClass().getSimpleName() + "_" + this.getID();
+		return String.format("%s/%s_%s", father.getDownloadPath(), this.getClass().getSimpleName(),this.getID());
 	}
 	
 	public Father getFather() {
