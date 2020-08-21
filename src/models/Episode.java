@@ -3,8 +3,8 @@ package models;
 import java.util.HashMap;
 
 
+@SuppressWarnings("rawtypes")
 public class Episode extends Model {
-
 
 	public Episode(Season season, int id) {
 		super(season, id);
@@ -17,7 +17,11 @@ public class Episode extends Model {
 	
 	@Override
 	public void AddChildren(Model child) {
-		// TODO: think of a better way to throw exception here
-		throw new UnsupportedOperationException("method not implemented yet!");
+		throw new UnsupportedOperationException("Episode do not have children");
+	}
+	
+	@Override
+	public String getDownloadPath() throws NullPointerException {
+		return String.format("%s%s", super.getDownloadPath(), "mp4");
 	}
 }
