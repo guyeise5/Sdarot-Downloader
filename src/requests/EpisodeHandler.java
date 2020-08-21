@@ -78,26 +78,26 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	                .setHeader("User-Agent", conf.getUserAgent())
 	                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getChangePartUrl((Season)e.getFather(), e.getID())))
 	                .build();
+	        
+	        // creating file full path to put the video in it and setting it as the output stream
+	        File targetFile = new File(String.format("%s%s", e.getDownloadPath(), ".mp4"));
+	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
+	        
 	        // sending video request
 	        HttpResponse<InputStream> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
-	        // creating file full path to put the video in it and setting it as the output stream
-	        File targetFile = new File(e.getDownloadPath());
-	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
-	        OutputStream outStream = new FileOutputStream(targetFile);
-	        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)e.getFather().getFather()).getName(), e.getFather().getID(), e.getID());
-	        // setting block size to be 8*1024
-	        byte[] buffer = new byte[8 * 1024];
-	        int bytesRead;
-	        // getting the video one block at a time
-	        while ((bytesRead = response.body().read(buffer)) != -1) {
-	            outStream.write(buffer, 0, bytesRead);
-	        }
-	        // closing the input stream
-	        response.body().close();
-	        // closing the output stream
-	        outStream.close();
 	        
-	        System.out.println("downloaded");
+	        // try-with to make sure input and output streams will be closed
+	        try (InputStream is = response.body();
+			     OutputStream outStream = new FileOutputStream(targetFile)) {
+		        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)e.getFather().getFather()).getName(), e.getFather().getID(), e.getID());
+	            byte[] buffer = new byte[8 * 1024];
+		        int bytesRead;
+		        // getting the video one block at a time
+		        while ((bytesRead = is.read(buffer)) != -1) {
+		            outStream.write(buffer, 0, bytesRead);
+		        }
+		        System.out.println("downloaded");
+	        } 
 		} catch (IOException | InterruptedException e1) {
 			System.out.printf("Could not download season %s, episode %s%n", e.getFather().getID(), e.getID());
 			e1.printStackTrace();
