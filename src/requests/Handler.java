@@ -2,17 +2,11 @@ package requests;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
-
 import models.Model;
-import models.Root;
-
 
 @SuppressWarnings("rawtypes")
 public abstract class Handler <Father extends Model, T extends Model> {
@@ -27,7 +21,7 @@ public abstract class Handler <Father extends Model, T extends Model> {
 			HttpResponse<String> response;
 			try {
 				response = getPageResponse(father, ID);
-				if (response.statusCode() == conf.OK_STATUS) {
+				if (response.statusCode() == HTTPStatus.OK) {
 		        	return true;
 		        }
 			} catch (IOException | InterruptedException e) {
@@ -41,13 +35,24 @@ public abstract class Handler <Father extends Model, T extends Model> {
 		HttpClient client = conf.getHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(String.format("%s/watch/%s", conf.getSdarotURI(), getChangePartUrl(father, ID))))
+                .uri(URI.create(String.format("%s/watch/%s", conf.getSdarotURI(), getSuffixUrl(father, ID))))
                 .setHeader("User-Agent", conf.getUserAgent())
                 .build();
 		return client.send(request, HttpResponse.BodyHandlers.ofString());
 	}
 	
-	public abstract String getChangePartUrl(Father father, int ID);
+	/**
+	 * <H1>
+	 * getSuffixUrl
+	 * </H1>
+	 * 
+	 * This function returns the specific part of the URL 
+	 * that is different between models. This allows more generic
+	 * in "getPageResponse" function
+	 * 
+	 * 
+	 */
+	public abstract String getSuffixUrl(Father father, int ID);
 	
 	public abstract T getByID(Father father, int ID) throws IOException, InterruptedException;
 	
