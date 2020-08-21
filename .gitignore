@@ -4,3 +4,4 @@ geckodriver.log
 images/
 *__pycache__*
 /bin/
+.settings
