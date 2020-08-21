@@ -84,7 +84,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	        File targetFile = new File(e.getDownloadPath());
 	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
 	        OutputStream outStream = new FileOutputStream(targetFile);
-	     
+	        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)e.getFather().getFather()).getName(), e.getFather().getID(), e.getID());
 	        // setting block size to be 8*1024
 	        byte[] buffer = new byte[8 * 1024];
 	        int bytesRead;
