@@ -129,10 +129,10 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	}
 	
 	private Map<String, Object> getVideoData(Episode e, String token) throws IOException, InterruptedException {
-		Map<String, Object> map = null;
 		
-		// request 
+		// parse request data
         String data = String.format("watch=true&season=%s&episode=%s&serie=%s&token=%s&type=episode",e.getFather().getID(), e.getID(), e.getFather().getFather().getID(), token);
+        // request for the video info
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(conf.getWatchURI())
@@ -141,8 +141,10 @@ public class EpisodeHandler extends Handler<Season, Episode> {
                 .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
                 .setHeader("Content-Type", conf.CONTENT_TYPE)
                 .build();
+        // sending the request
 		HttpResponse<String> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        map = jsonStringToHashMap(response.body());
+		// parsing the response as map
+		Map<String, Object> map = jsonStringToHashMap(response.body());
 		return map;
 	}
 	
