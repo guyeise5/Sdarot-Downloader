@@ -75,7 +75,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	                .build();
 	        
 	        // creating file full path to put the video in it and setting it as the output stream
-	        File targetFile = new File(e.getDownloadPath());
+	        File targetFile = new File(String.format("%s.downloading", e.getDownloadPath()));
 	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
 	        
 	        // sending video request
@@ -92,7 +92,9 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		            outStream.write(buffer, 0, bytesRead);
 		        }
 		        System.out.println("downloaded");
-	        } 
+	        }
+	        // rename file
+	        targetFile.renameTo(new File(String.format("%s.mp4", e.getDownloadPath())));
 		} catch (IOException | InterruptedException e1) {
 			System.out.printf("Could not download season %s, episode %s%n", e.getFather().getID(), e.getID());
 			e1.printStackTrace();
