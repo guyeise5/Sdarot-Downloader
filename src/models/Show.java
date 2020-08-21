@@ -17,7 +17,7 @@ public class Show extends Model<Root, Season> {
 		if(this.getName() == null) {
 			return super.getDownloadPath();
 		}
-		return father.getDownloadPath() + "/" + this.getName();
+		return String.format("%s/%s", father.getDownloadPath(), this.getName());
 	}
 
 	public String getName() {
