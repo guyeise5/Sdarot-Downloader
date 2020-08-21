@@ -19,9 +19,4 @@ public class Episode extends Model {
 	public void AddChildren(Model child) {
 		throw new UnsupportedOperationException("Episode do not have children");
 	}
-	
-	@Override
-	public String getDownloadPath() throws NullPointerException {
-		return String.format("%s%s", super.getDownloadPath(), "mp4");
-	}
 }
