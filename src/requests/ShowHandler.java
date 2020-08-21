@@ -5,13 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 import models.Root;
-import models.Season;
 import models.Show;
 
 // Singleton class
@@ -51,7 +46,8 @@ public class ShowHandler extends Handler<Root,Show> {
 		return name;
 	}
 
-	public String getChangePartUrl(Root root, int showID) {
+	@Override
+	public String getSuffixUrl(Root root, int showID) {
 		return String.format("%s", showID);
 	}
 	
@@ -66,9 +62,9 @@ public class ShowHandler extends Handler<Root,Show> {
 		if(!IsExists(root, showID)) {
 			return null;
 		}
-		Show ret = new Show((Root)root, showID);
+		Show ret = new Show(root, showID);
 		SeasonHandler.getInstance().getAll(ret).forEach(s -> ret.AddChildren(s));
-		ret.SetName(getShowName((Root)root, showID));
+		ret.SetName(getShowName(root, showID));
 		return ret;
 	}
 
@@ -78,7 +74,7 @@ public class ShowHandler extends Handler<Root,Show> {
 		try {
 			SeasonHandler.getInstance().getAll(show).forEach(s -> SeasonHandler.getInstance().download(s));
 		} catch (IOException | InterruptedException e) {
-		    System.out.printf("Can't download show %s, problem getting the seasons, error:%n", show.getID());
+		    System.out.printf("Can't download show %s, problem getting the seasons, error:%n", show.getName());
 			e.printStackTrace();
 		}
 	}
