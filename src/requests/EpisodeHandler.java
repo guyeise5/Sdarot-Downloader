@@ -59,57 +59,57 @@ public class EpisodeHandler extends Handler<Season, Episode> {
         while (matcher.find()) {
         	String episodeurl = matcher.group();
         	episodeurl = episodeurl.substring(0, episodeurl.length() - 1); // removing the " in the end
-        	System.out.println(episodeurl);
     		episodes.add(new Episode(season, Integer.parseInt(episodeurl.split("/episode/")[1])));
         }
 		return episodes;
 	}
 	
 	public void download(Episode e)  {
-		// TODO: Find a better way to deal with error 
+		// TODO: Find a better way to deal with errors
 		try {
+			// preWatching and getting video info 
 			Map<String, Object> vidInfo = getVideoData(e, preWatch(e));
-	        String data = String.format("token=%s&time=%s&uid=''", ((Map<String, Object>)vidInfo.get("watch")).get("480"), vidInfo.get("time"));
-	        
+			// data for the video request
+	        String data = String.format("token=%s&time=%s&uid=", ((Map<String, Object>)vidInfo.get("watch")).get("480"), vidInfo.get("time"));
+	        // creating video request
 	        HttpRequest request = HttpRequest.newBuilder()
 	                .GET()
-//	                .POST(HttpRequest.BodyPublishers.ofString(data))         video_url = f"https://{video_info['url']}/w/episode/{self._show_id}/480/{video_info['VID']}.mp4"
 	                .uri(URI.create(String.format("https://%s/w/episode/%s/480/%s.mp4?%s", vidInfo.get("url"), e.getFather().getFather().getID(), vidInfo.get("VID"), data)))
 	                .setHeader("User-Agent", conf.getUserAgent())
 	                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getChangePartUrl((Season)e.getFather(), e.getID())))
-	                //.setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
-	                .setHeader("Content-Type", conf.CONTENT_TYPE)
 	                .build();
-	        System.out.println("downloading ?");
+	        // sending video request
 	        HttpResponse<InputStream> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
-	        
-	        File targetFile = new File("ep.mp4");
+	        // creating file full path to put the video in it and setting it as the output stream
+	        File targetFile = new File(e.getDownloadPath());
+	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
 	        OutputStream outStream = new FileOutputStream(targetFile);
 	     
+	        // setting block size to be 8*1024
 	        byte[] buffer = new byte[8 * 1024];
 	        int bytesRead;
+	        // getting the video one block at a time
 	        while ((bytesRead = response.body().read(buffer)) != -1) {
 	            outStream.write(buffer, 0, bytesRead);
 	        }
+	        // closing the input stream
 	        response.body().close();
+	        // closing the output stream
 	        outStream.close();
-	    
-	        System.out.println();
 	        
+	        System.out.println("downloaded");
 		} catch (IOException | InterruptedException e1) {
 			System.out.printf("Could not download season %s, episode %s%n", e.getFather().getID(), e.getID());
 			e1.printStackTrace();
 		}
-		throw new UnsupportedOperationException("need to implement this");
-
 	}
 	
 	private String preWatch(Episode e) throws IOException, InterruptedException {
 		String token = null;
 		
-		// request data
+		// Parse the request data
         String data = String.format("preWatch=true&season=%s&ep=%s&SID=%s",e.getFather().getID(), e.getID(), e.getFather().getFather().getID());
-        System.out.println(String.format("%s/watch/%s", conf.getSdarotURI().toString(), getChangePartUrl((Season)e.getFather(), e.getID())));
+        // the request
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(conf.getWatchURI())
@@ -118,10 +118,13 @@ public class EpisodeHandler extends Handler<Season, Episode> {
                 .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
                 .setHeader("Content-Type", conf.CONTENT_TYPE)
                 .build();
+        // sending the request
 		HttpResponse<String> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+		// getting the token
         token = response.body();
         // waiting for the token to be valid
         Thread.sleep(30000);
+        // The token is valid
 		return token;
 	}
 	
