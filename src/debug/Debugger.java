@@ -1,7 +1,5 @@
 package debug;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +9,7 @@ public class Debugger {
 	}
 	
 	// Change this to select your log level
+	@SuppressWarnings("unused")
 	private static Level logLevel = Level.ALL;
 	
 //	private static String logPath = "./"+ new SimpleDateFormat("dd-MM-yyyy_HH:mm:ss").format(new Date(System.currentTimeMillis()));
