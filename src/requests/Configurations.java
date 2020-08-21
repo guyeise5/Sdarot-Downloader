@@ -11,35 +11,36 @@ import java.util.Random;
 
 // Singleton class
 class Configurations {
-
-	public static final int OK_STATUS = 200;
 	
 	// The possible urls for sdarot website 
-	private static final String[] SDAROT_URLS 
+	private final String[] SDAROT_URLS 
 	= {"https://sdarot.rocks",
-			//"https://www.hasdarot.net", // This one has diffrent api - by show name not by id
+			//"https://www.hasdarot.net", // This one has different api - by show name not by id
 			"http://sdarot.pro", 
 			"https://sdarot.world",
 			"https://sdarot.tv", 
 			"https://sdarot.work" };
 	// sdarot website page can't contain this
-	private static final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};
+	private final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};
 	// Some options for user agent
-	private static final String[] USER_AGENTS 
+	private final String[] USER_AGENTS 
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0" };
 	// x requested 
-	public static final String X_REQUESTED_WITH = "XMLHttpRequest";
-	public static final String CONTENT_TYPE= "application/x-www-form-urlencoded";
+	public final String X_REQUESTED_WITH = "XMLHttpRequest";
+	public final String CONTENT_TYPE= "application/x-www-form-urlencoded";
+	
+	// Delay before episode in milliseconds
+	public final int PRE_WATCH_DELAY_TIME = 30000;
 
 	// the sdarot uri
-	private static URI sdarotURI;
+	private URI sdarotURI;
 	// the watch uri
-	private static URI watchURI;
+	private URI watchURI;
 	// reusing the client for all requests
-	private static HttpClient httpClient;
+	private HttpClient httpClient;
 	// user-agent header (The browser agent)
-	private static String userAgent;
+	private String userAgent;
 
 	private static Configurations instance = null;
 	
@@ -63,48 +64,10 @@ class Configurations {
 	            .cookieHandler(CookieHandler.getDefault())
 	            .build();
 		
-		// Checking every sdarot url until we find a valid one
+		setAvailableURL();
 		
-		HttpResponse<String> response;
-		HttpRequest request;
-		URI uri;
-		this.sdarotURI = null;
-		
-		for (String url : SDAROT_URLS) {
-			uri = URI.create(url);
-	        request = HttpRequest.newBuilder()
-	                .GET()
-	                .uri(uri)
-	                .setHeader("User-Agent", this.userAgent)
-	                .build();
-
-			try {
-				response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-		        
-		       if (response.statusCode() == OK_STATUS) {
-		    	   // we got good response - now need to check the page is what we expect
-		    	   
-		    	   int index = 0;
-		    	   boolean goodUri = true;
-		    	   while (goodUri && index < WEBSITE_NOT_CONTAINES.length) {
-		    		   goodUri = !response.body().toString().contains(WEBSITE_NOT_CONTAINES[index]);
-		    		   index++;
-		    	   }
-		    	   
-		    	   if (goodUri) {
-		    		   this.sdarotURI = uri;
-		    		   this.watchURI = uri.create(String.format("%s%s",uri.toString(), "/ajax/watch")).normalize();
-		    		   break;
-		    	   }
-		       }
-			} catch (IOException | InterruptedException e1) {
-				System.out.printf("%s is not valid%n", url);
-				e1.printStackTrace();
-			}
-		}
-		
-		if (this.sdarotURI == null) {
-			throw new NullPointerException("there is no valid sdarot url");
+		if (this.getSdarotURI() == null) {
+			throw new NullPointerException("We could not find any sdarot site to access");
 		}
 	}
 	
@@ -122,5 +85,45 @@ class Configurations {
 
 	public String getUserAgent() {
 		return this.userAgent;
+	}
+	
+	private void setAvailableURL() {
+		HttpResponse<String> response;
+		HttpRequest request;
+		URI uri;
+		this.sdarotURI = null;
+		
+		for (String url : SDAROT_URLS) {
+			uri = URI.create(url);
+	        request = HttpRequest.newBuilder()
+	                .GET()
+	                .uri(uri)
+	                .setHeader("User-Agent", this.userAgent)
+	                .build();
+
+			try {
+				response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		        
+		       if (response.statusCode() == HTTPStatus.OK ) {
+		    	   // we got good response - now need to check the page is what we expect
+		    	   boolean goodUri = true;
+		    	   for (String s : WEBSITE_NOT_CONTAINES) {
+		    		   if(response.body().contains(s)) {
+		    			  goodUri = false;
+		    			  break;
+		    		   }
+		    	   }
+		    	   
+		    	   if (goodUri) {
+		    		   this.sdarotURI = uri;
+		    		   this.watchURI = URI.create(String.format("%s%s",uri.toString(), "/ajax/watch")).normalize();
+		    		   break;
+		    	   }
+		       }
+			} catch (IOException | InterruptedException e1) {
+				System.out.printf("%s is not valid%n", url);
+				e1.printStackTrace();
+			}
+		}
 	}
 }
