@@ -6,21 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
 import models.Episode;
-import models.Model;
 import models.Season;
 import models.Show;
 
@@ -37,8 +31,8 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	}
 	
 	@Override
-	public String getChangePartUrl(Season season, int episodeID) {
-		return String.format("%s/episode/%s", SeasonHandler.getInstance().getChangePartUrl(season.getFather(), season.getID()), episodeID);
+	public String getSuffixUrl(Season season, int episodeID) {
+		return String.format("%s/episode/%s", SeasonHandler.getInstance().getSuffixUrl(season.getFather(), season.getID()), episodeID);
 	}
 
 	@Override
@@ -46,7 +40,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		if(!IsExists(season, episodeID)) {
 			return null;
 		}
-		return new Episode((Season)season, episodeID);
+		return new Episode(season, episodeID);
 	}
 
 
@@ -70,17 +64,18 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 			// preWatching and getting video info 
 			Map<String, Object> vidInfo = getVideoData(e, preWatch(e));
 			// data for the video request
-	        String data = String.format("token=%s&time=%s&uid=", ((Map<String, Object>)vidInfo.get("watch")).get("480"), vidInfo.get("time"));
+	        @SuppressWarnings("unchecked")
+			String data = String.format("token=%s&time=%s&uid=", ((Map<String, Object>)vidInfo.get("watch")).get("480"), vidInfo.get("time"));
 	        // creating video request
 	        HttpRequest request = HttpRequest.newBuilder()
 	                .GET()
 	                .uri(URI.create(String.format("https://%s/w/episode/%s/480/%s.mp4?%s", vidInfo.get("url"), e.getFather().getFather().getID(), vidInfo.get("VID"), data)))
 	                .setHeader("User-Agent", conf.getUserAgent())
-	                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getChangePartUrl((Season)e.getFather(), e.getID())))
+	                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
 	                .build();
 	        
 	        // creating file full path to put the video in it and setting it as the output stream
-	        File targetFile = new File(String.format("%s%s", e.getDownloadPath(), ".mp4"));
+	        File targetFile = new File(e.getDownloadPath());
 	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
 	        
 	        // sending video request
@@ -114,7 +109,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(conf.getWatchURI())
                 .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getChangePartUrl((Season)e.getFather(), e.getID())))
+                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
                 .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
                 .setHeader("Content-Type", conf.CONTENT_TYPE)
                 .build();
@@ -123,7 +118,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		// getting the token
         token = response.body();
         // waiting for the token to be valid
-        Thread.sleep(30000);
+        Thread.sleep(conf.PRE_WATCH_DELAY_TIME);
         // The token is valid
 		return token;
 	}
@@ -137,15 +132,14 @@ public class EpisodeHandler extends Handler<Season, Episode> {
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(conf.getWatchURI())
                 .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getChangePartUrl((Season)e.getFather(), e.getID())))
+                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
                 .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
                 .setHeader("Content-Type", conf.CONTENT_TYPE)
                 .build();
         // sending the request
 		HttpResponse<String> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 		// parsing the response as map
-		Map<String, Object> map = jsonStringToHashMap(response.body());
-		return map;
+		return jsonStringToHashMap(response.body());
 	}
 	
 	// TODO: think of where to put this maybe handler or a util class
