@@ -154,11 +154,13 @@ public class EpisodeHandler extends Handler<Season, Episode> {
     	Object value;
     	String key;
         for (String pair : s.substring(1, s.length() - 1).split(",")) {
+        	System.out.println(pair);
         	key = pair.split(":")[0].replace("\"", "");
-        	if (pair.split(":")[1].charAt(0) == '{') {
-        		value = jsonStringToHashMap(pair.substring(pair.indexOf(":")+1));
+        	String after = pair.substring(pair.indexOf(":")+1);
+        	if (after.charAt(0) == '{') {
+        		value = jsonStringToHashMap(after);
         	} else {
-        		value = pair.split(":")[1].replace("\"", "");
+        		value = after.replace("\"", "");
         	}
 			map.put(key, value);
         }
