@@ -154,7 +154,6 @@ public class EpisodeHandler extends Handler<Season, Episode> {
     	Object value;
     	String key;
         for (String pair : s.substring(1, s.length() - 1).split(",")) {
-        	System.out.println(pair);
         	key = pair.split(":")[0].replace("\"", "");
         	String after = pair.substring(pair.indexOf(":")+1);
         	if (after.charAt(0) == '{') {
