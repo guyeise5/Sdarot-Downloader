@@ -24,7 +24,6 @@ public class Logger implements Closeable {
 	
 	// Variables
 	private LOG_LEVEL level;
-	private File logFile;
 	private PrintWriter writer; 
 		
 	// Constructors and Destructors
@@ -50,7 +49,7 @@ public class Logger implements Closeable {
 			writer.close();
 		}
 		
-		logFile = new File(filePath);
+		File logFile = new File(filePath);
         logFile.getParentFile().mkdirs(); // creating the path if not exists
     
         // If file already exists, this does nothing
