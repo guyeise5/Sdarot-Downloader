@@ -11,8 +11,10 @@ import models.Show;
 
 // Singleton class
 public class ShowHandler extends Handler<Root,Show> {
-
-	private ShowHandler() {}
+	
+	private ShowHandler() {
+		setUriPrefix("/watch/");
+	}
 	
 	private static ShowHandler instance = null;
 		
@@ -28,7 +30,7 @@ public class ShowHandler extends Handler<Root,Show> {
 		return null;
 	}
 	
-	private static String getShowName(Root r, int ShowID) {
+	private String getShowName(Root r, int ShowID) {
 		String name = String.format("%s", ShowID); 
 		try {
 			HttpResponse<String> response = ShowHandler.getInstance().getPageResponse(r, ShowID);
@@ -45,16 +47,26 @@ public class ShowHandler extends Handler<Root,Show> {
 		}
 		return name;
 	}
-
-	@Override
-	public String getSuffixUrl(Root root, int showID) {
-		return String.format("%s", showID);
-	}
 	
 	@Override
 	public List<Show> getAll(Root root) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Can't get all shows at once!");
+	}
+	
+	@Override
+	protected HttpResponse<String> getFatherPageResponse(Root root) throws IOException, InterruptedException {
+		throw new UnsupportedOperationException("This function is not implemented yet");
+	}
+	
+	@Override
+	public Pattern getPattern(Root father) {
+		throw new UnsupportedOperationException("This function is not implemented yet");
+	}
+	
+	@Override
+	public String getSuffixUrl(Root root, int showID) {
+		return String.format("%s%s", getUriPrefix(), showID);
 	}
 
 	@Override
@@ -67,7 +79,6 @@ public class ShowHandler extends Handler<Root,Show> {
 		ret.SetName(getShowName(root, showID));
 		return ret;
 	}
-
 	
 	@Override
 	public void download(Show show) {
