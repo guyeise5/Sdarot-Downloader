@@ -16,55 +16,41 @@ public class Logger implements Closeable {
 	// Static methods
 	public static Logger getInstance() {
 		if(Logger.instance == null) {
-			Logger.instance = new Logger();
+			try {
+				Logger.instance = new Logger();
+			} catch (IOException e) {
+				System.out.print(String.format("Unable to open logfile %s", configurations.Configurations.getInstance().LOG_FILE));
+				System.exit(1);
+			}
 		}
 		
 		return Logger.instance;
 	}
 	
 	// Variables
-	private LOG_LEVEL level;
 	private PrintWriter writer; 
 		
 	// Constructors and Destructors
-	private Logger() {
+	private Logger() throws IOException {
+		File logFile = new File(configurations.Configurations.getInstance().LOG_FILE);
+		logFile.getParentFile().mkdirs(); // creating the path if not exists
+		    
+		 // If file already exists, this does nothing
+		 logFile.createNewFile();
+		        
+		 // true - means append and not override
+		 writer = new PrintWriter(new FileWriter(logFile, true));
 	}
 	
-	
-	// Getters and setters
-	public LOG_LEVEL getLogLevel() {
-		return level;
-	}
-
-	public void setLogLevel(LOG_LEVEL level) {
-		this.level = level;
-	}
-
 	
 	// Methods
-	public void setLogFilePath(String filePath) throws IOException {
-		
-		// Close the writer if already set
-		if(writer != null) {
-			writer.close();
-		}
-		
-		File logFile = new File(filePath);
-        logFile.getParentFile().mkdirs(); // creating the path if not exists
-    
-        // If file already exists, this does nothing
-        logFile.createNewFile();
-        
-        // true - means append and not override
-        writer = new PrintWriter(new FileWriter(logFile, true));
-	}
 
 	public void log(LOG_LEVEL level, String message) {
 		if (level == LOG_LEVEL.NONE) {
 			throw new UnsupportedOperationException("You can not log on NONE log level");
 		}
 		
-		if (level.compareTo(this.getLogLevel()) > 0) {
+		if (level.compareTo(configurations.Configurations.getInstance().LOG_LEVEL) > 0) {
 			String msg = String.format("%s - %s\n", currentDate(), message);
 			
 			System.out.print(msg);
@@ -92,7 +78,6 @@ public class Logger implements Closeable {
 			exception.printStackTrace(writer);
 			writer.flush();
 		}
-		
 	}
 	
 	private String currentDate() {
@@ -101,8 +86,6 @@ public class Logger implements Closeable {
 		return df.format(logTime);
 	}
 
-
-	
 	@Override
 	public void close() throws IOException {
 		if (writer != null) {
