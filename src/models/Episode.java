@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 
 @SuppressWarnings("rawtypes")
-public class Episode extends Model {
+public class Episode extends Model<Season, Model> {
 
 	public Episode(Season season, int id) {
 		super(season, id);
