@@ -8,11 +8,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import models.Episode;
 import models.Season;
@@ -20,7 +17,9 @@ import models.Show;
 
 public class EpisodeHandler extends Handler<Season, Episode> {
 
-	private EpisodeHandler() {}
+	private EpisodeHandler() {
+		setUriPrefix("/episode/");
+	}
 	private static EpisodeHandler instance = null;
 	
 	public static EpisodeHandler getInstance() {
@@ -31,8 +30,23 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	}
 	
 	@Override
+	protected HttpResponse<String> getFatherPageResponse(Season season) throws IOException, InterruptedException {
+		return SeasonHandler.getInstance().getPageResponse(season.getFather(), season.getID());
+	}
+	
+	@Override
+	public Pattern getPattern(Season season) {
+		return Pattern.compile(String.format("(%s%s-.*?%s%s%s(\\d+?)\")", 
+				ShowHandler.getInstance().getUriPrefix(),
+				season.getFather().getID(), 
+				SeasonHandler.getInstance().getUriPrefix(),
+				season.getID(),
+				getUriPrefix()));
+	}
+	
+	@Override
 	public String getSuffixUrl(Season season, int episodeID) {
-		return String.format("%s/episode/%s", SeasonHandler.getInstance().getSuffixUrl(season.getFather(), season.getID()), episodeID);
+		return String.format("%s%s%s", SeasonHandler.getInstance().getSuffixUrl(season.getFather(), season.getID()), getUriPrefix(), episodeID);
 	}
 
 	@Override
@@ -41,21 +55,6 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 			return null;
 		}
 		return new Episode(season, episodeID);
-	}
-
-
-	
-	@Override
-	public List<Episode> getAll(Season season) throws IOException, InterruptedException {
-		List<Episode> episodes = new ArrayList<>();
-		Pattern episodePattern = Pattern.compile(String.format("(/watch/%s-.*?/season/%s/episode/(\\d+?)\")", season.getFather().getID(), season.getID()));
-        Matcher matcher = episodePattern.matcher(SeasonHandler.getInstance().getPageResponse(season.getFather(), season.getID()).body());
-        while (matcher.find()) {
-        	String episodeurl = matcher.group();
-        	episodeurl = episodeurl.substring(0, episodeurl.length() - 1); // removing the " in the end
-    		episodes.add(new Episode(season, Integer.parseInt(episodeurl.split("/episode/")[1])));
-        }
-		return episodes;
 	}
 	
 	public void download(Episode e)  {
@@ -71,7 +70,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	                .GET()
 	                .uri(URI.create(String.format("https://%s/w/episode/%s/480/%s.mp4?%s", vidInfo.get("url"), e.getFather().getFather().getID(), vidInfo.get("VID"), data)))
 	                .setHeader("User-Agent", conf.getUserAgent())
-	                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
+	                .setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
 	                .build();
 	        
 	        // creating file full path to put the video in it and setting it as the output stream
@@ -111,7 +110,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(conf.getWatchURI())
                 .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
+                .setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
                 .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
                 .setHeader("Content-Type", conf.CONTENT_TYPE)
                 .build();
@@ -134,7 +133,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(conf.getWatchURI())
                 .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s/watch/%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
+                .setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
                 .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
                 .setHeader("Content-Type", conf.CONTENT_TYPE)
                 .build();
