@@ -3,3 +3,5 @@ geckodriver.log
 .idea/
 images/
 *__pycache__*
+/bin/
+.settings
