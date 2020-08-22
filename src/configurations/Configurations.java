@@ -31,7 +31,7 @@ public class Configurations {
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0" };
 	
-	public final String X_REQUESTED_WITH = "XMLHttpRequest"; 	// x requested 
+	public final String X_REQUESTED_WITH = "XMLHttpRequest"; 
 	
 	public final String CONTENT_TYPE= "application/x-www-form-urlencoded";
 	
@@ -127,7 +127,7 @@ public class Configurations {
 		    	   
 		    	   if (goodUri) {
 		    		   this.sdarotURI = uri;
-		    		   this.watchURI = URI.create(String.format("%s%s",uri.toString(), "/ajax/watch")).normalize();
+		    		   this.watchURI = URI.create(String.format("%s/ajax/watch",uri.toString())).normalize();
 		    		   break;
 		    	   }
 		       }
