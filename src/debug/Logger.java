@@ -10,14 +10,25 @@ import java.time.format.DateTimeFormatter;
 
 public class Logger implements Closeable {
 		
+	// Static variables
+	private static Logger instance = null;
+	
+	// Static methods
+	public static Logger getInstance() {
+		if(Logger.instance == null) {
+			Logger.instance = new Logger();
+		}
+		
+		return Logger.instance;
+	}
+	
 	// Variables
 	private LOG_LEVEL level;
-	
 	private File logFile;
 	private PrintWriter writer; 
 		
 	// Constructors and Destructors
-	public Logger() {
+	private Logger() {
 	}
 	
 	
@@ -61,6 +72,9 @@ public class Logger implements Closeable {
 	}
 
 	public void log(LOG_LEVEL level, Exception exception) {
+		if (level == LOG_LEVEL.NONE) {
+			throw new UnsupportedOperationException("You can not log on NONE log level");
+		}
 		String date = currentDate();
 		
 		// Log to console
