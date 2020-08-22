@@ -1,4 +1,4 @@
-package requests;
+package configurations;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,39 +9,51 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.Random;
 
+import debug.LOG_LEVEL;
+import requests.HTTPStatus;
+
 // Singleton class
-class Configurations {
+public class Configurations {
 	
-	// The possible urls for sdarot website 
-	private final String[] SDAROT_URLS 
+// Constants configurations
+	// Network   
+	private final String[] SDAROT_URLS // The possible urls for sdarot website 
 	= {"https://sdarot.rocks",
-			//"https://www.hasdarot.net", // This one has different api - by show name not by id
 			"http://sdarot.pro", 
 			"https://sdarot.world",
 			"https://sdarot.tv", 
 			"https://sdarot.work" };
-	// sdarot website page can't contain this
-	private final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};
-	// Some options for user agent
-	private final String[] USER_AGENTS 
+	
+
+	private final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};	// Sdarot website page can't contain any of those strings
+
+	private final String[] USER_AGENTS 	// Some options for user agent
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0" };
-	// x requested 
-	public final String X_REQUESTED_WITH = "XMLHttpRequest";
+	
+	public final String X_REQUESTED_WITH = "XMLHttpRequest"; 
+	
 	public final String CONTENT_TYPE= "application/x-www-form-urlencoded";
 	
-	// Delay before episode in milliseconds
-	public final int PRE_WATCH_DELAY_TIME = 30000;
 
-	// the sdarot uri
-	private URI sdarotURI;
-	// the watch uri
-	private URI watchURI;
-	// reusing the client for all requests
-	private HttpClient httpClient;
-	// user-agent header (The browser agent)
-	private String userAgent;
+	public final int PRE_WATCH_DELAY_TIME = 30000;	// Delay before episode start in milliseconds
 
+	// Logging
+	public final String LOG_FILE=".\\log\\sdarot-downloader.log"; // Location for logfile, set null to disable logging to file
+	
+	public final LOG_LEVEL LOG_LEVEL = debug.LOG_LEVEL.TRACE;
+	
+// Variables
+	private URI sdarotURI; 	// the sdarot uri
+
+
+	private URI watchURI;	// the watch uri
+
+	private HttpClient httpClient;	// reusing the client for all requests
+
+	private String userAgent;	// user-agent header (The browser agent)
+
+// Singleton methods
 	private static Configurations instance = null;
 	
 	public static Configurations getInstance() {
@@ -64,13 +76,12 @@ class Configurations {
 	            .cookieHandler(CookieHandler.getDefault())
 	            .build();
 		
+		// Find available url to access
 		setAvailableURL();
 		
-		if (this.getSdarotURI() == null) {
-			throw new NullPointerException("We could not find any sdarot site to access");
-		}
 	}
 	
+// Methods
 	public URI getSdarotURI() {
 		return this.sdarotURI;
 	}
@@ -116,7 +127,7 @@ class Configurations {
 		    	   
 		    	   if (goodUri) {
 		    		   this.sdarotURI = uri;
-		    		   this.watchURI = URI.create(String.format("%s%s",uri.toString(), "/ajax/watch")).normalize();
+		    		   this.watchURI = URI.create(String.format("%s/ajax/watch",uri.toString())).normalize();
 		    		   break;
 		    	   }
 		       }
@@ -124,6 +135,10 @@ class Configurations {
 				System.out.printf("%s is not valid%n", url);
 				e1.printStackTrace();
 			}
+		}
+		if (this.sdarotURI == null)
+		{
+			throw new NullPointerException("We could not find any Sdarot site to access, try add more options in ~/configurations/Configurations.java");
 		}
 	}
 }
