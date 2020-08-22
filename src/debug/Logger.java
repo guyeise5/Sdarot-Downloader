@@ -43,7 +43,13 @@ public class Logger implements Closeable {
 
 	
 	// Methods
-	public void setLogFilePath(String filePath) throws IOException {		
+	public void setLogFilePath(String filePath) throws IOException {
+		
+		// Close the writer if already set
+		if(writer != null) {
+			writer.close();
+		}
+		
 		logFile = new File(filePath);
         logFile.getParentFile().mkdirs(); // creating the path if not exists
     
