@@ -53,12 +53,7 @@ public class SeasonHandler extends Handler<Show,Season> {
 
 	@Override
 	public void download(Season season) {
-		try {
-			EpisodeHandler.getInstance().getAll(season).forEach(e -> EpisodeHandler.getInstance().download(e));
-		} catch (IOException | InterruptedException e) {
-		    System.out.printf("Can't download season %s, problem getting the episodes, error:%n", season.getID());
-			e.printStackTrace();
-		}
+		season.getChildren().forEach((i, e) -> EpisodeHandler.getInstance().download(e));
 	}
 	
 }
