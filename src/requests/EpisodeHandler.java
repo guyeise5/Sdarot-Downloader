@@ -5,12 +5,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -21,6 +27,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 import models.Episode;
 import models.Season;
 import models.Show;
+import okhttp3.Cookie;
 
 
 public class EpisodeHandler extends Handler<Season, Episode> {
@@ -68,6 +75,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	public void download(Episode e)  {
 		// TODO: find a better way to deal with errors
 		// TODO: logger
+		// TODO: Think about cookie more
 		
 		// Doing the pre watch in selenium because they keep changing the requests
 		System.setProperty("webdriver.chrome.driver","chromedriver.exe");
@@ -76,10 +84,10 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		options.addArguments("headless");
 		WebDriver driver = new ChromeDriver(options);
 		// setting timeout of 1 minute
-		WebDriverWait wait = new WebDriverWait(driver, 60);
+		WebDriverWait wait = new WebDriverWait(driver, 45);
 		try {
 			// The pre watch wait
-			driver.get(String.format("%s/%s", conf.getSdarotURI(), getSuffixUrl(e.getFather(), e.getID())));
+			driver.get(String.format("%s%s", conf.getSdarotURI(), getSuffixUrl(e.getFather(), e.getID())));
 			System.out.printf("prewatching serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
 			WebElement continueBtn = wait.until(elementToBeClickable(By.id("proceed")));
 			continueBtn.click();
@@ -88,28 +96,32 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 			WebElement video = driver.findElement(By.tagName("video"));
 			URI video_uri = URI.create(video.getAttribute("src"));
 			
-			
-			// creating file full path to put the video in it and setting it as the output stream
+			// creating file full path to put the video in it
 	        File targetFile = new File(String.format("%s.downloading", e.getDownloadPath()));
-	        targetFile.getParentFile().mkdirs(); // creating the path if not exists
+	        targetFile.getParentFile().mkdirs(); 
 	        
-	        //driver.manage().getCookies();
-	        // TODO: GETTING COOKIES AND PUTTING IN CLIENT ..
+	        // getting the cookies
+	        String cookie = driver.manage().getCookieNamed("Sdarot").getValue();
 	        
-			// requesting video data and putting it in to file chunk by chunk
+			// requesting video data
 			HttpRequest request	= HttpRequest.newBuilder()
 					.GET()
 					.uri(video_uri)
 					.setHeader("User-Agent", conf.getUserAgent())
 					.setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
+					.setHeader("Cookie", String.format("Sdarot=%s", cookie))
 					.build();
 			HttpResponse<InputStream> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
+			// Using response as input stream and file as output stream
+			// Putting the video in the file chunk by chunk
 			try (InputStream is = response.body();
 					OutputStream outStream = new FileOutputStream(targetFile)) {
+				
 		        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
-	            byte[] buffer = new byte[8 * 1024];
+	            
+		        byte[] buffer = new byte[1024 * 1024];
 		        int bytesRead;
-		        // getting the video one block at a time
+
 		        while ((bytesRead = is.read(buffer)) != -1) {
 		            outStream.write(buffer, 0, bytesRead);
 		        }
@@ -117,9 +129,10 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 			}
 			// rename file
 	        targetFile.renameTo(new File(String.format("%s.mp4", e.getDownloadPath())));
-		} catch (IOException | InterruptedException e1) {
+		} catch (IOException | InterruptedException | TimeoutException e1) {
 			System.out.printf("Could not download serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
 			e1.printStackTrace();
+			//this.download(e);
 		} finally {
 			driver.close();	
 		}
