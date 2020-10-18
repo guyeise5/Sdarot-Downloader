@@ -5,16 +5,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookieStore;
-import java.net.HttpCookie;
+
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Set;
+
 import java.util.regex.Pattern;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -27,7 +24,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 import models.Episode;
 import models.Season;
 import models.Show;
-import okhttp3.Cookie;
 
 
 public class EpisodeHandler extends Handler<Season, Episode> {
