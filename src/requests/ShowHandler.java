@@ -77,17 +77,13 @@ public class ShowHandler extends Handler<Root,Show> {
 		Show ret = new Show(root, showID);
 		SeasonHandler.getInstance().getAll(ret).forEach(s -> ret.AddChildren(s));
 		ret.SetName(getShowName(root, showID));
+		System.out.println(ret.getName());
 		return ret;
 	}
 	
 	@Override
 	public void download(Show show) {
-		try {
-			SeasonHandler.getInstance().getAll(show).forEach(s -> SeasonHandler.getInstance().download(s));
-		} catch (IOException | InterruptedException e) {
-		    System.out.printf("Can't download show %s, problem getting the seasons, error:%n", show.getName());
-			e.printStackTrace();
-		}
+		show.getChildren().forEach((i, s) -> SeasonHandler.getInstance().download(s));
 	}
 
 }

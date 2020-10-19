@@ -1,7 +1,6 @@
-geckodriver.log
 *.mp4
 .idea/
 images/
-*__pycache__*
 /bin/
 .settings
+debug.log

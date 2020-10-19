@@ -5,15 +5,26 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
+
 import java.util.regex.Pattern;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+
 import models.Episode;
 import models.Season;
 import models.Show;
+
 
 public class EpisodeHandler extends Handler<Season, Episode> {
 
@@ -58,106 +69,68 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 	}
 	
 	public void download(Episode e)  {
-		// TODO: Find a better way to deal with errors
+		// TODO: find a better way to deal with errors
+		// TODO: logger
+		// TODO: Think about cookie more
+		
+		// Doing the pre watch in selenium because they keep changing the requests
+		System.setProperty("webdriver.chrome.driver","chromedriver.exe");
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("headless");
+		WebDriver driver = new ChromeDriver(options);
+		// setting timeout of 1 minute
+		WebDriverWait wait = new WebDriverWait(driver, 45);
 		try {
-			// preWatching and getting video info 
-			Map<String, Object> vidInfo = getVideoData(e, preWatch(e));
-			// data for the video request
-	        @SuppressWarnings("unchecked")
-			String data = String.format("token=%s&time=%s&uid=", ((Map<String, Object>)vidInfo.get("watch")).get("480"), vidInfo.get("time"));
-	        // creating video request
-	        HttpRequest request = HttpRequest.newBuilder()
-	                .GET()
-	                .uri(URI.create(String.format("https://%s/w/episode/%s/480/%s.mp4?%s", vidInfo.get("url"), e.getFather().getFather().getID(), vidInfo.get("VID"), data)))
-	                .setHeader("User-Agent", conf.getUserAgent())
-	                .setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
-	                .build();
-	        
-	        // creating file full path to put the video in it and setting it as the output stream
+			// The pre watch wait
+			driver.get(String.format("%s%s", conf.getSdarotURI(), getSuffixUrl(e.getFather(), e.getID())));
+			System.out.printf("prewatching serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
+			WebElement continueBtn = wait.until(elementToBeClickable(By.id("proceed")));
+			continueBtn.click();
+			
+			// Getting the video source url
+			WebElement video = driver.findElement(By.tagName("video"));
+			URI video_uri = URI.create(video.getAttribute("src"));
+			
+			// creating file full path to put the video in it
 	        File targetFile = new File(String.format("%s.downloading", e.getDownloadPath()));
-	        targetFile.getParentFile().mkdirs(); // creating the path if not exists 
+	        targetFile.getParentFile().mkdirs(); 
 	        
-	        // sending video request
-	        HttpResponse<InputStream> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
+	        // getting the cookies
+	        String cookie = driver.manage().getCookieNamed("Sdarot").getValue();
 	        
-	        // try-with to make sure input and output streams will be closed
-	        try (InputStream is = response.body();
-			     OutputStream outStream = new FileOutputStream(targetFile)) {
-		        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)e.getFather().getFather()).getName(), e.getFather().getID(), e.getID());
-	            byte[] buffer = new byte[8 * 1024];
+			// requesting video data
+			HttpRequest request	= HttpRequest.newBuilder()
+					.GET()
+					.uri(video_uri)
+					.setHeader("User-Agent", conf.getUserAgent())
+					.setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
+					.setHeader("Cookie", String.format("Sdarot=%s", cookie))
+					.build();
+			HttpResponse<InputStream> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
+			// Using response as input stream and file as output stream
+			// Putting the video in the file chunk by chunk
+			try (InputStream is = response.body();
+					OutputStream outStream = new FileOutputStream(targetFile)) {
+				
+		        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
+	            
+		        byte[] buffer = new byte[1024 * 1024];
 		        int bytesRead;
-		        // getting the video one block at a time
+
 		        while ((bytesRead = is.read(buffer)) != -1) {
 		            outStream.write(buffer, 0, bytesRead);
 		        }
 		        System.out.println("downloaded");
-	        }
-	        // rename file
+			}
+			// rename file
 	        targetFile.renameTo(new File(String.format("%s.mp4", e.getDownloadPath())));
-		} catch (IOException | InterruptedException e1) {
-			System.out.printf("Could not download season %s, episode %s%n", e.getFather().getID(), e.getID());
+		} catch (IOException | InterruptedException | TimeoutException e1) {
+			System.out.printf("Could not download serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
 			e1.printStackTrace();
+			//this.download(e);
+		} finally {
+			driver.close();	
 		}
-	}
-	
-	private String preWatch(Episode e) throws IOException, InterruptedException {
-		String token = null;
-		
-		// Parse the request data
-        String data = String.format("preWatch=true&season=%s&ep=%s&SID=%s",e.getFather().getID(), e.getID(), e.getFather().getFather().getID());
-        // the request
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(data))
-                .uri(conf.getWatchURI())
-                .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
-                .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
-                .setHeader("Content-Type", conf.CONTENT_TYPE)
-                .build();
-        // sending the request
-		HttpResponse<String> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-		// getting the token
-        token = response.body();
-        // waiting for the token to be valid
-        Thread.sleep(conf.PRE_WATCH_DELAY_TIME);
-        // The token is valid
-		return token;
-	}
-	
-	private Map<String, Object> getVideoData(Episode e, String token) throws IOException, InterruptedException {
-		
-		// parse request data
-        String data = String.format("watch=true&season=%s&episode=%s&serie=%s&token=%s&type=episode",e.getFather().getID(), e.getID(), e.getFather().getFather().getID(), token);
-        // request for the video info
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(data))
-                .uri(conf.getWatchURI())
-                .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
-                .setHeader("X-Requested-With", conf.X_REQUESTED_WITH)
-                .setHeader("Content-Type", conf.CONTENT_TYPE)
-                .build();
-        // sending the request
-		HttpResponse<String> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-		// parsing the response as map
-		return jsonStringToHashMap(response.body());
-	}
-	
-	// TODO: think of where to put this maybe handler or a util class
-	private Map<String, Object> jsonStringToHashMap(String s){
-		Map<String, Object> map = new HashMap<>();
-    	Object value;
-    	String key;
-        for (String pair : s.substring(1, s.length() - 1).split(",")) {
-        	key = pair.split(":")[0].replace("\"", "");
-        	String after = pair.substring(pair.indexOf(":")+1);
-        	if (after.charAt(0) == '{') {
-        		value = jsonStringToHashMap(after);
-        	} else {
-        		value = after.replace("\"", "");
-        	}
-			map.put(key, value);
-        }
-        return map;
 	}
 }

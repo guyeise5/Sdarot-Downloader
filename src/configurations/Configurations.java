@@ -18,14 +18,18 @@ public class Configurations {
 // Constants configurations
 	// Network   
 	private final String[] SDAROT_URLS // The possible urls for sdarot website 
-	= {"https://sdarot.rocks",
-			"http://sdarot.pro", 
+	= {"https://sdarot.today",
+			"https://sdarot.rocks",
+			"http://sdarot.pro",
 			"https://sdarot.world",
 			"https://sdarot.tv", 
-			"https://sdarot.work" };
+			"https://sdarot.work"};
 	
 
-	private final String[] WEBSITE_NOT_CONTAINES = {"אתר זה הינו אתר מפר זכויות יוצרים"};	// Sdarot website page can't contain any of those strings
+	private final String[] WEBSITE_NOT_CONTAINES // Sdarot website page can't contain any of those strings
+	= {"אתר זה הינו אתר מפר זכויות יוצרים",
+			"תקלה בשידור",
+			"הכתובת ממנה נכנסת אינה פעילה יותר ותיחסם בקרוב"};	
 
 	private final String[] USER_AGENTS 	// Some options for user agent
 	= {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36", 
