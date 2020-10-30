@@ -41,16 +41,24 @@ public class Configurations {
 	
 
 	public final int PRE_WATCH_DELAY_TIME = 30000;	// Delay before episode start in milliseconds
-
+	
+	public final int DELAY_BETWEEN_REQUESTS = 2000; // Delay before sending requests
+	
 	// Logging
 	public final String LOG_FILE=".\\log\\sdarot-downloader.log"; // Location for logfile, set null to disable logging to file
 	
 	public final LOG_LEVEL LOG_LEVEL = debug.LOG_LEVEL.TRACE;
+
+	// Files
+	public final String IMAGES_PATH = "./images";
+	
+	public final int BLOCK_SIZE =  1024 * 1024; // Block size  
 	
 // Variables
 	private URI sdarotURI; 	// the sdarot uri
 
-
+	private URI staticSdarotURI; // the static sdarot uri 
+	
 	private URI watchURI;	// the watch uri
 
 	private HttpClient httpClient;	// reusing the client for all requests
@@ -94,6 +102,10 @@ public class Configurations {
 		return this.watchURI;
 	}
 	
+	public URI getStaticSdarotURI() {
+		return this.staticSdarotURI;
+	}
+	
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
@@ -106,7 +118,10 @@ public class Configurations {
 		HttpResponse<String> response;
 		HttpRequest request;
 		URI uri;
+		
 		this.sdarotURI = null;
+		this.watchURI = null;
+		this.staticSdarotURI = null;
 		
 		for (String url : SDAROT_URLS) {
 			uri = URI.create(url);
@@ -131,6 +146,7 @@ public class Configurations {
 		    	   
 		    	   if (goodUri) {
 		    		   this.sdarotURI = uri;
+		    		   this.staticSdarotURI = URI.create(String.format("%s://static.%s", uri.toString().split("://", 2)[0], uri.toString().split("://", 2)[1]));
 		    		   this.watchURI = URI.create(String.format("%s/ajax/watch",uri.toString())).normalize();
 		    		   break;
 		    	   }
