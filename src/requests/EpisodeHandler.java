@@ -115,7 +115,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 				
 		        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
 	            
-		        byte[] buffer = new byte[1024 * 1024];
+		        byte[] buffer = new byte[conf.BLOCK_SIZE];
 		        int bytesRead;
 
 		        while ((bytesRead = is.read(buffer)) != -1) {
