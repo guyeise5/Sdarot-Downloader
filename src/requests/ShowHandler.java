@@ -1,27 +1,17 @@
 package requests;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URL;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
-import org.openqa.selenium.TimeoutException;
-
-import java.net.URI;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import models.Root;
-import models.Season;
 import models.Show;
 
 // Singleton class
