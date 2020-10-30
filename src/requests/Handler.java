@@ -47,7 +47,7 @@ public abstract class Handler <Father extends Model, T extends Model> {
 	
 	public HttpResponse<String> getPageResponse(Father father, int ID) throws IOException, InterruptedException {
 		HttpClient client = conf.getHttpClient();
-		Thread.sleep(2000);
+		Thread.sleep(conf.DELAY_BETWEEN_REQUESTS);
 		HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(String.format("%s%s", conf.getSdarotURI(), getSuffixUrl(father, ID))).normalize())
