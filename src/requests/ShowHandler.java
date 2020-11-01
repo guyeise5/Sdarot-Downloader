@@ -3,8 +3,13 @@ package requests;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,6 +73,33 @@ public class ShowHandler extends Handler<Root,Show> {
 		throw new UnsupportedOperationException("Can't get all shows at once!");
 	}
 	
+	public HashSet<Integer> getShowsIDs(Root root, int load, Integer start) throws InterruptedException, IOException {
+		if (start == null) {
+			start = 1;
+		}
+		
+		HttpClient client = conf.getHttpClient();
+		Thread.sleep(conf.DELAY_BETWEEN_REQUESTS);
+		HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create(String.format("%s/series?loadMore=%s&start=%s&search[from]=&search[to]=&search[order]=releaseYear&search[dir]=DESC", conf.getAjaxURI(), load, start)).normalize())
+                .setHeader("User-Agent", conf.getUserAgent())
+                .setHeader("Referer", String.format("%s/series", conf.getSdarotURI()))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        HashSet<Integer> showIDs = new HashSet<Integer>();
+		Pattern modelPattern = getPattern(root);
+		Matcher matcher = modelPattern.matcher(response.body());
+        while (matcher.find()) {
+        	String modelurl = matcher.group();
+        	showIDs.add(Integer.parseInt(modelurl.split(getUriPrefix())[1].split("-")[0]));
+        }
+        
+		return showIDs;
+		
+	}
+	
 	@Override
 	protected HttpResponse<String> getFatherPageResponse(Root root) throws IOException, InterruptedException {
 		throw new UnsupportedOperationException("This function is not implemented yet");
@@ -75,7 +107,9 @@ public class ShowHandler extends Handler<Root,Show> {
 	
 	@Override
 	public Pattern getPattern(Root father) {
-		throw new UnsupportedOperationException("This function is not implemented yet");
+		return Pattern.compile(String.format("href=\"[^>]*\">", 
+				getUriPrefix()));
+		//throw new UnsupportedOperationException("This function is not implemented yet");
 	}
 	
 	@Override
