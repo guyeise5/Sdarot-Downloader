@@ -59,7 +59,7 @@ public class Configurations {
 
 	private URI staticSdarotURI; // the static sdarot uri 
 	
-	private URI watchURI;	// the watch uri
+	private URI ajaxURI;	// the ajax uri
 
 	private HttpClient httpClient;	// reusing the client for all requests
 
@@ -98,8 +98,8 @@ public class Configurations {
 		return this.sdarotURI;
 	}
 	
-	public URI getWatchURI() {
-		return this.watchURI;
+	public URI getAjaxURI() {
+		return this.ajaxURI;
 	}
 	
 	public URI getStaticSdarotURI() {
@@ -120,7 +120,7 @@ public class Configurations {
 		URI uri;
 		
 		this.sdarotURI = null;
-		this.watchURI = null;
+		this.ajaxURI = null;
 		this.staticSdarotURI = null;
 		
 		for (String url : SDAROT_URLS) {
@@ -147,7 +147,7 @@ public class Configurations {
 		    	   if (goodUri) {
 		    		   this.sdarotURI = uri;
 		    		   this.staticSdarotURI = URI.create(String.format("%s://static.%s", uri.toString().split("://", 2)[0], uri.toString().split("://", 2)[1]));
-		    		   this.watchURI = URI.create(String.format("%s/ajax/watch",uri.toString())).normalize();
+		    		   this.ajaxURI = URI.create(String.format("%s/ajax",uri.toString())).normalize();
 		    		   break;
 		    	   }
 		       }
