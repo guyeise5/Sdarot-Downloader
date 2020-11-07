@@ -29,6 +29,7 @@ import models.Show;
 public class EpisodeHandler extends Handler<Season, Episode> {
 
 	private EpisodeHandler() {
+		super();
 		setUriPrefix("/episode/");
 	}
 	private static EpisodeHandler instance = null;
@@ -83,7 +84,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		WebDriverWait wait = new WebDriverWait(driver, 45);
 		try {
 			// The pre watch wait
-			driver.get(String.format("%s%s", conf.getSdarotURI(), getSuffixUrl(e.getFather(), e.getID())));
+			driver.get(String.format("%s%s", getSdarotURI(), getSuffixUrl(e.getFather(), e.getID())));
 			System.out.printf("prewatching serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
 			WebElement continueBtn = wait.until(elementToBeClickable(By.id("proceed")));
 			continueBtn.click();
@@ -103,11 +104,11 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 			HttpRequest request	= HttpRequest.newBuilder()
 					.GET()
 					.uri(video_uri)
-					.setHeader("User-Agent", conf.getUserAgent())
-					.setHeader("Referer", String.format("%s%s", conf.getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
+					.setHeader("User-Agent", getConfigurations().getUserAgent())
+					.setHeader("Referer", String.format("%s%s", getSdarotURI().toString(), getSuffixUrl((Season)e.getFather(), e.getID())))
 					.setHeader("Cookie", String.format("Sdarot=%s", cookie))
 					.build();
-			HttpResponse<InputStream> response = conf.getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
+			HttpResponse<InputStream> response = getConfigurations().getHttpClient().send(request, HttpResponse.BodyHandlers.ofInputStream());
 			// Using response as input stream and file as output stream
 			// Putting the video in the file chunk by chunk
 			try (InputStream is = response.body();
@@ -115,7 +116,7 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 				
 		        System.out.printf("Starting download serie %s season %s episode %s%n", ((Show)(e.getFather().getFather())).getName(), e.getFather().getID(), e.getID());
 	            
-		        byte[] buffer = new byte[conf.BLOCK_SIZE];
+		        byte[] buffer = new byte[getConfigurations().BLOCK_SIZE];
 		        int bytesRead;
 
 		        while ((bytesRead = is.read(buffer)) != -1) {

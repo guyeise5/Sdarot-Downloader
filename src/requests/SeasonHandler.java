@@ -11,6 +11,7 @@ import models.Show;
 public class SeasonHandler extends Handler<Show,Season> {
 	
 	private SeasonHandler() {
+		super();
 		setUriPrefix("/season/");
 	}
 	

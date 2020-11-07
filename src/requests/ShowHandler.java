@@ -23,6 +23,7 @@ import models.Show;
 public class ShowHandler extends Handler<Root,Show> {
 	
 	private ShowHandler() {
+		super();
 		setUriPrefix("/watch/");
 	}
 	
@@ -36,13 +37,13 @@ public class ShowHandler extends Handler<Root,Show> {
 	}
 	
 	public BufferedImage getShowImage(int ShowID) throws InterruptedException, IOException {
-		File targetFile = new File(String.format("%s/%s.jpg", conf.IMAGES_PATH, ShowID));
+		File targetFile = new File(String.format("%s/%s.jpg", getConfigurations().IMAGES_PATH, ShowID));
 		BufferedImage showImage;
 		if (targetFile.exists()) {
 			showImage = ImageIO.read(targetFile);
 		} else {
 			// if image not available getting it from website
-			showImage = ImageIO.read(new URL(String.format("%s/series/%s.jpg", conf.getStaticSdarotURI(), ShowID)));
+			showImage = ImageIO.read(new URL(String.format("%s/series/%s.jpg", getStaticSdarotURI(), ShowID)));
 			targetFile.getParentFile().mkdirs();
 			ImageIO.write(showImage, "jpg", targetFile);
 		}
@@ -78,13 +79,13 @@ public class ShowHandler extends Handler<Root,Show> {
 			start = 1;
 		}
 		
-		HttpClient client = conf.getHttpClient();
-		Thread.sleep(conf.DELAY_BETWEEN_REQUESTS);
+		HttpClient client = getConfigurations().getHttpClient();
+		Thread.sleep(getConfigurations().DELAY_BETWEEN_REQUESTS);
 		HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(String.format("%s/series?loadMore=%s&start=%s&search[from]=&search[to]=&search[order]=releaseYear&search[dir]=DESC", conf.getAjaxURI(), load, start)).normalize())
-                .setHeader("User-Agent", conf.getUserAgent())
-                .setHeader("Referer", String.format("%s/series", conf.getSdarotURI()))
+                .uri(URI.create(String.format("%s/series?loadMore=%s&start=%s&search[from]=&search[to]=&search[order]=releaseYear&search[dir]=DESC", getAjaxURI(), load, start)).normalize())
+                .setHeader("User-Agent", getConfigurations().getUserAgent())
+                .setHeader("Referer", String.format("%s/series", getSdarotURI()))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         
@@ -133,5 +134,4 @@ public class ShowHandler extends Handler<Root,Show> {
 	public void download(Show show) {
 		show.getChildren().forEach((i, s) -> SeasonHandler.getInstance().download(s));
 	}
-
 }
