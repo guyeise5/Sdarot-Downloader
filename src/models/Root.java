@@ -4,7 +4,7 @@ package models;
  * <H1>
  * Root
  * </H1>
- * This class is Root, which is the father of shows
+ * This class is Root, which is the father of {@link Show}
  */
 public class Root extends Model<Model<?, ?>, Show> {
 
@@ -18,7 +18,7 @@ public class Root extends Model<Model<?, ?>, Show> {
 	 * <H1>
 	 * Root
 	 * </H1>
-	 * Constructor 
+	 * Constructor of {@link Root}
 	 */
 	public Root() {
 		super(null, 0);

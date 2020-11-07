@@ -4,7 +4,7 @@ package models;
  * <H1>
  * Show
  * </H1>
- * This class is a show, child of root and father of seasons
+ * This class is a show, child of {@link Root} and father of {@link Season}
  */
 public class Show extends Model<Root, Season> {
 
@@ -18,7 +18,7 @@ public class Show extends Model<Root, Season> {
 	 * <H1>
 	 * Show
 	 * </H1>
-	 * Constructor
+	 * Constructor of {@link Show}
 	 * @param root the father of the show
 	 * @param id the id of the show
 	 */
