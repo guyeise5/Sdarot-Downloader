@@ -25,15 +25,40 @@ import models.Episode;
 import models.Season;
 import models.Show;
 
-
+/**
+ * <H1>
+ * EpisodeHandler
+ * </H1>
+ * This class is {@link Handler} for {@link Episode}s in sdarot site.
+ */
 public class EpisodeHandler extends Handler<Season, Episode> {
 
+	// Properties
+	
+	private static EpisodeHandler instance = null;
+
+	// Methods
+	
+	/**
+	 * <H1>
+	 * EpisodeHandler
+	 * </H1>
+	 * Constructor of {@link EpisodeHandler}
+	 */
 	private EpisodeHandler() {
 		super();
 		setUriPrefix("/episode/");
 	}
-	private static EpisodeHandler instance = null;
 	
+	/**
+	 * <H1>
+	 * getInstance
+	 * </H1>
+	 * 
+	 * This function is the only way to access to the {@link EpisodeHandler} instance
+	 * It creates it if it is not exist.
+	 * @return The EpisodeHandler instance
+	 */
 	public static EpisodeHandler getInstance() {
 		if(instance == null) {
 			instance = new EpisodeHandler();
@@ -41,11 +66,29 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		return instance;
 	}
 	
+	/**
+	 * <H1>
+	 * getFatherPageResponse
+	 * </H1>
+	 * Getting the page response of the {@link Season}
+	 * @param season the season to get it's page
+	 * @return the page response
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	@Override
 	protected HttpResponse<String> getFatherPageResponse(Season season) throws IOException, InterruptedException {
 		return SeasonHandler.getInstance().getPageResponse(season.getFather(), season.getID());
 	}
 	
+	/**
+	 * <H1>
+	 * getPattern
+	 * </H1>
+	 * getting the {@link Episode} pattern to be able to find the episodes in the {@link Season} page
+	 * @param season the season of the episodes we want the pattern to
+	 * @return the pattern
+	 */
 	@Override
 	public Pattern getPattern(Season season) {
 		return Pattern.compile(String.format("(%s%s-.*?%s%s%s(\\d+?)\")", 
@@ -56,11 +99,31 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 				getUriPrefix()));
 	}
 	
+	/**
+	 * <H1>
+	 * getSuffixUrl
+	 * </H1>
+	 * This function returns the specific part of the URL for the {@link Episode}
+	 * @param season the {@link Season} of the episode
+	 * @param episodeID the id of the episode
+	 * @return the suffix url of the episode
+	 */
 	@Override
 	public String getSuffixUrl(Season season, int episodeID) {
 		return String.format("%s%s%s", SeasonHandler.getInstance().getSuffixUrl(season.getFather(), season.getID()), getUriPrefix(), episodeID);
 	}
 
+	/**
+	 * <H1>
+	 * getByID
+	 * </H1>
+	 * finding the {@link Episode} by the model's id
+	 * @param season the episode's season
+	 * @param episodeID the episode id
+	 * @return the Episode
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	@Override
 	public Episode getByID(Season season, int episodeID) {
 		if(!IsExists(season, episodeID)) {
@@ -69,6 +132,13 @@ public class EpisodeHandler extends Handler<Season, Episode> {
 		return new Episode(season, episodeID);
 	}
 	
+	/**
+	 * <H1>
+	 * download
+	 * </H1>
+	 * download the {@link Episode}
+	 * @param e the episode to download
+	 */
 	public void download(Episode e)  {
 		// TODO: find a better way to deal with errors
 		// TODO: logger
